@@ -5,7 +5,7 @@ using System.Text;
 
 namespace TickTock.Core.Blobs
 {
-    public class BlobRepository
+    public class BlobRepository : IBlobRepository
     {
         private readonly string location;
 
@@ -17,22 +17,25 @@ namespace TickTock.Core.Blobs
         public Blob GetById(Guid identifier)
         {
             string name = GuidToString(identifier);
-            string path = Path.Combine(location, name);
+            string[] files = Directory.GetFiles(location, $"{name}-*");
 
-            FileInfo file = new FileInfo(path);
-            MD5 md5 = new MD5Cng();
+            string[] parts = Path.GetFileName(files[0]).Split('-');
+            FileInfo file = new FileInfo(files[0]);
 
             return new Blob
             {
                 Identifier = identifier,
-                Hash = BytesToString(md5.ComputeHash(file.OpenRead())),
+                Hash = parts[1],
                 Size = file.Length
             };
         }
 
-        public byte[] GetData(Guid id)
+        public byte[] GetData(Guid identifier)
         {
-            return null;
+            string name = GuidToString(identifier);
+            string[] files = Directory.GetFiles(location, $"{name}-*");
+
+            return File.ReadAllBytes(files[0]);
         }
 
         public Guid Add(byte[] data)
@@ -40,15 +43,24 @@ namespace TickTock.Core.Blobs
             Guid identifier = Guid.NewGuid();
             string name = GuidToString(identifier);
 
-            string path = Path.Combine(location, name);
-            File.WriteAllBytes(path, data);
+            string hash = BytesToHash(data);
+            string path = Path.Combine(location, $"{name}-{hash}");
 
+            File.WriteAllBytes(path, data);
             return identifier;
         }
 
         private static string GuidToString(Guid value)
         {
             return BytesToString(value.ToByteArray());
+        }
+
+        private static string BytesToHash(byte[] bytes)
+        {
+            using (MD5 algorithm = MD5.Create())
+            {
+                return BytesToString(algorithm.ComputeHash(bytes));
+            }
         }
 
         private static string BytesToString(byte[] bytes)

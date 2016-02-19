@@ -36,6 +36,7 @@
   <ItemGroup>
     <Compile Include="Blobs\Blob.cs" />
     <Compile Include="Blobs\BlobRepository.cs" />
+    <Compile Include="Blobs\IBlobRepository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup />
