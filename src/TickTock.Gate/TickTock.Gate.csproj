@@ -39,6 +39,7 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\ModelBinder.cs" />
     <Compile Include="Modules\BlobsModule.cs" />
     <Compile Include="Modules\JobsModule.cs" />
     <Compile Include="Modules\SchedulesModule.cs" />

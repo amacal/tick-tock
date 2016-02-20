@@ -51,7 +51,7 @@ namespace TickTock.Gate.Tests.Modules
         }
 
         [Fact]
-        public void PostingNewBlobShouldReturnApplicationJson()
+        public void PostingNewBlobShouldReturnJson()
         {
             BrowserResponse response;
 
