@@ -13,8 +13,6 @@ namespace TickTock.Gate.Modules
             Delete["/{job}"] = parameters => HttpStatusCode.OK;
 
             Get["/{job}/versions"] = parameters => HttpStatusCode.OK;
-            Post["/{job}/versions"] = parameters => HttpStatusCode.OK;
-            Patch["/{job}/versions/{version}"] = parameters => HttpStatusCode.OK;
             Delete["/{job}/versions/{version}"] = parameters => HttpStatusCode.OK;
         }
     }

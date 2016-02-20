@@ -66,6 +66,7 @@
   <ItemGroup>
     <Compile Include="Blobs\BlobRepositoryFixture.cs" />
     <Compile Include="Extensions\BytesExtensionsFixture.cs" />
+    <Compile Include="Jobs\JobRepositoryFixture.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
