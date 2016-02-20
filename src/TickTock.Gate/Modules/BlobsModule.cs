@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using TickTock.Core.Blobs;
+using TickTock.Core.Extensions;
 
 namespace TickTock.Gate.Modules
 {
@@ -15,7 +16,8 @@ namespace TickTock.Gate.Modules
             this.repository = repository;
 
             Post["/"] = parameters => HandlePostBlob();
-            Get["/{id}"] = parameters => HttpStatusCode.OK;
+            Get["/{id}"] = parameters => HandleGetBlob(parameters.Id);
+            Get["/{id}/data"] = parameters => HandleGetBlobData(parameters.Id);
         }
 
         private Response HandlePostBlob()
@@ -25,11 +27,42 @@ namespace TickTock.Gate.Modules
                 Request.Body.CopyTo(memory);
                 memory.Seek(0, SeekOrigin.Begin);
 
-                Guid identifier = repository.Add(memory.ToArray());
-                var response = new { id = identifier };
+                byte[] content = memory.ToArray();
+                Guid identifier = repository.Add(content);
 
-                return Response.AsJson(response);
+                return Response.AsJson(new
+                {
+                    id = identifier.ToHex()
+                });
             }
+        }
+
+        private Response HandleGetBlob(Guid? identifier)
+        {
+            Blob blob = repository.GetById(identifier.Value);
+
+            if (blob == null)
+                return HttpStatusCode.NotFound;
+
+            return Response.AsJson(new
+            {
+                size = blob.Size,
+                hash = blob.Hash
+            });
+        }
+
+        private Response HandleGetBlobData(Guid? identifier)
+        {
+            Blob blob = repository.GetById(identifier.Value);
+
+            if (blob == null)
+                return HttpStatusCode.NotFound;
+
+            byte[] data = repository.GetData(identifier.Value);
+            MemoryStream memory = new MemoryStream(data);
+
+            memory.Seek(0, SeekOrigin.Begin);
+            return Response.FromStream(memory, "application/octet-stream");
         }
     }
 }

@@ -13,8 +13,8 @@ namespace TickTock.Core.Tests.Blobs
 
         public BlobRepositoryFixture()
         {
-            this.sandbox = new FileSandbox(new EmptyFileLocator());
-            this.repository = new BlobRepository(this.sandbox.Directory);
+            sandbox = new FileSandbox(new EmptyFileLocator());
+            repository = new BlobRepository(this.sandbox.Directory);
         }
 
         [Fact]
@@ -28,6 +28,16 @@ namespace TickTock.Core.Tests.Blobs
         }
 
         [Fact]
+        public void RequestingNotAddedBlobShouldReturnNull()
+        {
+            Guid identifier = Guid.NewGuid();
+
+            Blob blob = repository.GetById(identifier);
+
+            blob.Should().BeNull();
+        }
+
+        [Fact]
         public void RequestingAddedBlobShouldReturnItsIdentifier()
         {
             byte[] data = { 0x01, 0x02, 0x03 };
@@ -35,7 +45,7 @@ namespace TickTock.Core.Tests.Blobs
 
             Blob blob = repository.GetById(identifier);
 
-            Assert.Equal(identifier, blob.Identifier);
+            identifier.Should().Be(blob.Identifier);
         }
 
         [Fact]
