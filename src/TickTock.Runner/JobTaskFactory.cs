@@ -24,6 +24,7 @@ namespace TickTock.Runner
 
             string root = Path.Combine(location, name);
             string path = Path.Combine(root, "blob");
+
             Directory.CreateDirectory(path);
 
             using (MemoryStream memory = new MemoryStream(blob))

@@ -27,7 +27,7 @@ namespace TickTock.Runner.Tests
             });
 
             sandbox = new FileSandbox(new EmptyFileLocator());
-            factory = new JobTaskFactory(this.sandbox.Directory, repository);
+            factory = new JobTaskFactory(sandbox.Directory, repository);
         }
 
         [Fact]
