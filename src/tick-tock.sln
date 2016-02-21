@@ -11,6 +11,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TickTock.Core.Tests", "Tick
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TickTock.Gate.Tests", "TickTock.Gate.Tests\TickTock.Gate.Tests.csproj", "{63823355-A7A7-44AF-B30E-E947DB472B8D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TickTock.Runner", "TickTock.Runner\TickTock.Runner.csproj", "{77759337-23E9-498C-9DD1-DE49E7DCD449}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TickTock.Runner.Tests", "TickTock.Runner.Tests\TickTock.Runner.Tests.csproj", "{8A9DE28B-D5E3-4155-A20D-D0F1856A294D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +37,14 @@ Global
 		{63823355-A7A7-44AF-B30E-E947DB472B8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{63823355-A7A7-44AF-B30E-E947DB472B8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{63823355-A7A7-44AF-B30E-E947DB472B8D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{77759337-23E9-498C-9DD1-DE49E7DCD449}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77759337-23E9-498C-9DD1-DE49E7DCD449}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77759337-23E9-498C-9DD1-DE49E7DCD449}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77759337-23E9-498C-9DD1-DE49E7DCD449}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8A9DE28B-D5E3-4155-A20D-D0F1856A294D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8A9DE28B-D5E3-4155-A20D-D0F1856A294D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8A9DE28B-D5E3-4155-A20D-D0F1856A294D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8A9DE28B-D5E3-4155-A20D-D0F1856A294D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

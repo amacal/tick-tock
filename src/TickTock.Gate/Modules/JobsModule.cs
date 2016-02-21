@@ -22,7 +22,15 @@ namespace TickTock.Gate.Modules
             Delete["/{job}"] = parameters => HttpStatusCode.OK;
 
             Get["/{job}/versions"] = parameters => HttpStatusCode.OK;
+            Get["/{job}/versions/{version}"] = parameters => HttpStatusCode.OK;
             Delete["/{job}/versions/{version}"] = parameters => HttpStatusCode.OK;
+
+            Get["/{job}/schedule"] = parameters => HttpStatusCode.OK;
+            Patch["/{job}/schedule"] = parameters => HttpStatusCode.OK;
+
+            Get["/{job}/executions"] = parameters => HttpStatusCode.OK;
+            Get["/{job}/executions/newest"] = parameters => HttpStatusCode.OK;
+            Get["/{job}/executions/{execution}"] = parameters => HttpStatusCode.OK;
         }
 
         public Response HandlePostJob(dynamic model)
@@ -31,6 +39,8 @@ namespace TickTock.Gate.Modules
             {
                 Name = model.name,
                 Description = model.description,
+                Executable = model.executable,
+                Arguments = model.arguments,
                 Blob = model.blob
             };
 
@@ -56,6 +66,8 @@ namespace TickTock.Gate.Modules
                 version = job.Header.Version,
                 name = job.Data.Name,
                 description = job.Data.Description,
+                executable = job.Data.Executable,
+                arguments = job.Data.Arguments,
                 blob = job.Data.Blob.ToHex()
             });
         }

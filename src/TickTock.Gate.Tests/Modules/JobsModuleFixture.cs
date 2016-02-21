@@ -125,6 +125,8 @@ namespace TickTock.Gate.Tests.Modules
                 version = Jobs.SampleHeader.Version,
                 name = Jobs.SampleData.Name,
                 description = Jobs.SampleData.Description,
+                executable = Jobs.SampleData.Executable,
+                arguments = Jobs.SampleData.Arguments,
                 blob = Jobs.SampleData.Blob.ToHex()
             };
 
@@ -146,6 +148,10 @@ namespace TickTock.Gate.Tests.Modules
 
             public string description;
 
+            public string executable;
+
+            public string arguments;
+
             public string blob;
         }
 
@@ -164,6 +170,10 @@ namespace TickTock.Gate.Tests.Modules
 
             public string description;
 
+            public string executable;
+
+            public string arguments;
+
             public string blob;
         }
 
@@ -179,6 +189,8 @@ namespace TickTock.Gate.Tests.Modules
             {
                 Name = "tick-tock",
                 Description = "Lorem ipsum dolor sit amet.",
+                Executable = "tick-tock",
+                Arguments = "--process",
                 Blob = Guid.NewGuid()
             };
         }

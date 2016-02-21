@@ -10,11 +10,8 @@ namespace TickTock.Gate.Core
     {
         public object Bind(NancyContext context, Type modelType, object instance, BindingConfig configuration, params string[] blackList)
         {
-            var data =
-                GetDataFields(context);
-
-            var model =
-                DynamicDictionary.Create(data);
+            IDictionary<string, object> data = GetDataFields(context);
+            DynamicDictionary model = DynamicDictionary.Create(data);
 
             return model;
         }
@@ -31,12 +28,12 @@ namespace TickTock.Gate.Core
 
         private static IDictionary<string, object> Merge(IEnumerable<IDictionary<string, string>> dictionaries)
         {
-            var output =
-                new Dictionary<string, object>(StringComparer.InvariantCultureIgnoreCase);
+            IEqualityComparer<string> comparer = StringComparer.InvariantCultureIgnoreCase;
+            Dictionary<string, object> output = new Dictionary<string, object>(comparer);
 
-            foreach (var dictionary in dictionaries.Where(d => d != null))
+            foreach (IDictionary<string, string> dictionary in dictionaries.Where(d => d != null))
             {
-                foreach (var kvp in dictionary)
+                foreach (KeyValuePair<string, string> kvp in dictionary)
                 {
                     if (!output.ContainsKey(kvp.Key))
                     {

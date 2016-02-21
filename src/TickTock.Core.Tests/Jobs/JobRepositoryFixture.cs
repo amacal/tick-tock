@@ -143,6 +143,7 @@ namespace TickTock.Core.Tests.Jobs
             {
                 Name = "tick-tock",
                 Description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod.",
+                Executable = "tick-tock.exe",
                 Blob = Guid.NewGuid()
             };
 
@@ -150,6 +151,8 @@ namespace TickTock.Core.Tests.Jobs
             {
                 Name = "tick-tock",
                 Description = "Lorem ipsum dolor sit amet.",
+                Executable = "tick-tock.exe",
+                Arguments = "--reprocess",
                 Blob = Guid.NewGuid()
             };
         }
