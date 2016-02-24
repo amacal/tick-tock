@@ -4,7 +4,6 @@ using Nancy.Bootstrapper;
 using Nancy.Testing;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using TickTock.Core.Blobs;
 using TickTock.Core.Extensions;
 using TickTock.Gate.Modules;
@@ -13,15 +12,15 @@ using Xunit;
 namespace TickTock.Gate.Tests.Modules
 {
     [Collection("Nancy")]
-    public class BlobsModuleFixture : IDisposable
+    public class BlobsModuleTests : IDisposable
     {
         private readonly INancyBootstrapper bootstrapper;
-        private readonly BlobRepository repository;
+        private readonly BlobRepositoryMock repository;
         private readonly Browser browser;
 
-        public BlobsModuleFixture()
+        public BlobsModuleTests()
         {
-            repository = new BlobRepository(with =>
+            repository = new BlobRepositoryMock(with =>
             {
                 with.Blob(Blobs.SampleId, Blobs.SampleData);
             });
@@ -29,7 +28,7 @@ namespace TickTock.Gate.Tests.Modules
             bootstrapper = new ConfigurableBootstrapper(with =>
             {
                 with.Module<BlobsModule>();
-                with.Dependency<IBlobRepository>(repository);
+                with.Dependency<BlobRepository>(repository);
             });
 
             browser = new Browser(bootstrapper, with =>
@@ -137,48 +136,6 @@ namespace TickTock.Gate.Tests.Modules
         }
 
         [Fact]
-        public void GettingExistingBlobDataShouldReturn200()
-        {
-            string id = Blobs.SampleId;
-
-            BrowserResponse response = browser.Get($"/blobs/{id}/data", with =>
-            {
-            });
-
-            response.StatusCode.Should().Be(HttpStatusCode.OK);
-        }
-
-        [Fact]
-        public void GettingExistingBlobDataShouldReturnApplicationOctetStream()
-        {
-            string id = Blobs.SampleId;
-
-            BrowserResponse response = browser.Get($"/blobs/{id}/data", with =>
-            {
-            });
-
-            response.ContentType.Should().Be("application/octet-stream");
-        }
-
-        [Fact]
-        public void GettingExistingBlobDataShouldReturnItsContent()
-        {
-            byte[] data = Blobs.SampleData;
-            string id = Blobs.SampleId;
-
-            BrowserResponse response = browser.Get($"/blobs/{id}/data", with =>
-            {
-            });
-
-            using (Stream stream = response.Body.AsStream())
-            using (MemoryStream memory = new MemoryStream())
-            {
-                stream.CopyTo(memory);
-                memory.ToArray().Should().Equal(data);
-            }
-        }
-
-        [Fact]
         public void GettingNotExistingBlobDataShouldReturn404()
         {
             string id = "5129ac3c07e346269f55cbfb086f3e59";
@@ -216,24 +173,27 @@ namespace TickTock.Gate.Tests.Modules
             public static readonly string SampleHash = SampleData.ToHash();
         }
 
-        public class BlobRepository : IBlobRepository
+        public class BlobRepositoryMock : BlobRepository
         {
             private readonly Dictionary<Guid, byte[]> items;
 
-            public BlobRepository(Action<BlobRepositoryConfigurer> with)
+            public BlobRepositoryMock(Action<BlobRepositoryConfigurer> with)
             {
+                base.Add = Add;
+                base.GetById = GetById;
+
                 items = new Dictionary<Guid, byte[]>();
                 with(new BlobRepositoryConfigurer(items));
             }
 
-            public Guid Add(byte[] data)
+            private new Blob Add(byte[] data)
             {
                 Guid id = Guid.NewGuid();
                 items[id] = data;
-                return id;
+                return GetById(id);
             }
 
-            public Blob GetById(Guid identifier)
+            private new Blob GetById(Guid identifier)
             {
                 byte[] content;
                 items.TryGetValue(identifier, out content);
@@ -244,14 +204,9 @@ namespace TickTock.Gate.Tests.Modules
                 return new Blob
                 {
                     Identifier = identifier,
-                    Size = content.Length,
-                    Hash = content.ToHash()
+                    GetSize = () => content.Length,
+                    GetHash = () => content.ToHash()
                 };
-            }
-
-            public byte[] GetData(Guid identifier)
-            {
-                return items[identifier];
             }
         }
 

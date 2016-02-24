@@ -13,15 +13,15 @@ using Xunit;
 namespace TickTock.Gate.Tests.Modules
 {
     [Collection("Nancy")]
-    public class JobsModuleFixture : IDisposable
+    public class JobsModuleTests : IDisposable
     {
         private readonly INancyBootstrapper bootstrapper;
-        private readonly JobRepository repository;
+        private readonly JobRepositoryStub repository;
         private readonly Browser browser;
 
-        public JobsModuleFixture()
+        public JobsModuleTests()
         {
-            repository = new JobRepository(with =>
+            repository = new JobRepositoryStub(with =>
             {
                 with.Job(Jobs.SampleHeader, Jobs.SampleData);
             });
@@ -29,7 +29,7 @@ namespace TickTock.Gate.Tests.Modules
             bootstrapper = new ConfigurableBootstrapper(with =>
             {
                 with.Module<JobsModule>();
-                with.Dependency<IJobRepository>(repository);
+                with.Dependency<JobRepository>(repository);
             });
 
             browser = new Browser(bootstrapper, with =>
@@ -195,17 +195,20 @@ namespace TickTock.Gate.Tests.Modules
             };
         }
 
-        public class JobRepository : IJobRepository
+        public class JobRepositoryStub : JobRepository
         {
             private readonly Dictionary<JobHeader, JobData> items;
 
-            public JobRepository(Action<JobRepositoryConfigurer> with)
+            public JobRepositoryStub(Action<JobRepositoryConfigurer> with)
             {
+                base.Add = Add;
+                base.GetById = GetById;
+
                 items = new Dictionary<JobHeader, JobData>();
                 with(new JobRepositoryConfigurer(items));
             }
 
-            public JobHeader Add(JobData data)
+            private new JobHeader Add(JobData data)
             {
                 JobHeader header = new JobHeader
                 {
@@ -217,7 +220,7 @@ namespace TickTock.Gate.Tests.Modules
                 return header;
             }
 
-            public Job GetById(Guid identifier)
+            private new Job GetById(Guid identifier)
             {
                 return items
                     .Where(x => x.Key.Identifier == identifier)

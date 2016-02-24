@@ -8,9 +8,9 @@ namespace TickTock.Gate.Modules
 {
     public class JobsModule : NancyModule
     {
-        private readonly IJobRepository repository;
+        private readonly JobRepository repository;
 
-        public JobsModule(IJobRepository repository)
+        public JobsModule(JobRepository repository)
             : base("/jobs")
         {
             this.repository = repository;

@@ -36,18 +36,31 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Blobs\Blob.cs" />
     <Compile Include="Blobs\BlobRepository.cs" />
-    <Compile Include="Blobs\IBlobRepository.cs" />
+    <Compile Include="Blobs\BlobRepositoryFactory.cs" />
+    <Compile Include="Executions\JobExecutionRepositoryFactory.cs" />
+    <Compile Include="Executions\JobExecution.cs" />
+    <Compile Include="Executions\JobExecutionFileEntry.cs" />
+    <Compile Include="Executions\JobExecutionMetrics.cs" />
+    <Compile Include="Executions\JobExecutionProgress.cs" />
+    <Compile Include="Executions\JobExecutionRepository.cs" />
+    <Compile Include="Executions\JobExecutionSchedule.cs" />
+    <Compile Include="Executions\JobExecutionStatus.cs" />
+    <Compile Include="Executions\JobMemoryUsage.cs" />
+    <Compile Include="Executions\JobProcessorUsage.cs" />
     <Compile Include="Extensions\BytesExtensions.cs" />
-    <Compile Include="Jobs\IJobRepository.cs" />
+    <Compile Include="Extensions\ContextExtensions.cs" />
+    <Compile Include="Jobs\JobRepository.cs" />
     <Compile Include="Jobs\Job.cs" />
     <Compile Include="Jobs\JobData.cs" />
     <Compile Include="Jobs\JobHeader.cs" />
-    <Compile Include="Jobs\JobInfo.cs" />
-    <Compile Include="Jobs\JobRepository.cs" />
+    <Compile Include="Jobs\JobFileEntry.cs" />
+    <Compile Include="Jobs\JobRepositoryFactory.cs" />
     <Compile Include="Jobs\JobSchedule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

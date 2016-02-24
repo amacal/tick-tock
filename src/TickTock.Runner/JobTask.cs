@@ -1,13 +1,13 @@
-﻿namespace TickTock.Runner
+﻿using System;
+
+namespace TickTock.Runner
 {
     public class JobTask
     {
-        public string Path { get; set; }
+        public Guid Identifier { get; set; }
 
-        public string Executable { get; set; }
+        public JobTaskStatistics Statistics { get; set; }
 
-        public string Arguments { get; set; }
-
-        public string WorkingDirectory { get; set; }
+        public Action Start { get; set; }
     }
 }

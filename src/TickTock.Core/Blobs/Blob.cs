@@ -6,8 +6,10 @@ namespace TickTock.Core.Blobs
     {
         public Guid Identifier { get; set; }
 
-        public string Hash { get; set; }
+        public Func<string> GetHash { get; set; }
 
-        public long Size { get; set; }
+        public Func<long> GetSize { get; set; }
+
+        public Action<string> DeployTo { get; set; }
     }
 }

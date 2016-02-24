@@ -83,6 +83,11 @@
     <Compile Include="JobTaskFactoryFixture.cs" />
     <Compile Include="JobTaskManagerFixture.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Stubs\BlobBuilder.cs" />
+    <Compile Include="Stubs\BlobRepository.cs" />
+    <Compile Include="Stubs\BlobRepositoryConfigurer.cs" />
+    <Compile Include="Stubs\JobExecutionRepository.cs" />
+    <Compile Include="Stubs\JobExecutionRepositoryConfigurer.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TickTock.Core\TickTock.Core.csproj">

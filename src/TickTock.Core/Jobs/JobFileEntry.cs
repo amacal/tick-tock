@@ -1,6 +1,6 @@
 ﻿namespace TickTock.Core.Jobs
 {
-    public class JobInfo
+    public class JobFileEntry
     {
         public string Path { get; set; }
 

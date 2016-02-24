@@ -6,15 +6,15 @@ using Xunit;
 
 namespace TickTock.Core.Tests.Blobs
 {
-    public class BlobRepositoryFixture : IDisposable
+    public class BlobRepositoryTests : IDisposable
     {
         private readonly FileSandbox sandbox;
         private readonly BlobRepository repository;
 
-        public BlobRepositoryFixture()
+        public BlobRepositoryTests()
         {
             sandbox = new FileSandbox(new EmptyFileLocator());
-            repository = new BlobRepository(this.sandbox.Directory);
+            repository = BlobRepositoryFactory.Create(sandbox.Directory);
         }
 
         [Fact]
@@ -22,9 +22,9 @@ namespace TickTock.Core.Tests.Blobs
         {
             byte[] data = { 0x01, 0x02, 0x03 };
 
-            Guid identifier = repository.Add(data);
+            Blob blob = repository.Add(data);
 
-            identifier.Should().NotBeEmpty();
+            blob.Identifier.Should().NotBeEmpty();
         }
 
         [Fact]
@@ -41,44 +41,33 @@ namespace TickTock.Core.Tests.Blobs
         public void RequestingAddedBlobShouldReturnItsIdentifier()
         {
             byte[] data = { 0x01, 0x02, 0x03 };
-            Guid identifier = repository.Add(data);
+            Blob added = repository.Add(data);
 
-            Blob blob = repository.GetById(identifier);
+            Blob blob = repository.GetById(added.Identifier);
 
-            identifier.Should().Be(blob.Identifier);
+            blob.Identifier.Should().Be(added.Identifier);
         }
 
         [Fact]
         public void RequestingAddedBlobShouldReturnItsSize()
         {
             byte[] data = { 0x01, 0x02, 0x03 };
-            Guid identifier = repository.Add(data);
+            Blob added = repository.Add(data);
 
-            Blob blob = repository.GetById(identifier);
+            Blob blob = repository.GetById(added.Identifier);
 
-            blob.Size.Should().Be(3);
+            blob.GetSize().Should().Be(3);
         }
 
         [Fact]
         public void RequestingAddedBlobShouldReturnItsHash()
         {
             byte[] data = { 0x01, 0x02, 0x03 };
-            Guid identifier = repository.Add(data);
+            Blob added = repository.Add(data);
 
-            Blob blob = repository.GetById(identifier);
+            Blob blob = repository.GetById(added.Identifier);
 
-            blob.Hash.Should().Be("5289df737df57326fcdd22597afb1fac");
-        }
-
-        [Fact]
-        public void RequestingAddedBlobShouldReturnItsContent()
-        {
-            byte[] data = { 0x01, 0x02, 0x03 };
-            Guid identifier = repository.Add(data);
-
-            byte[] content = repository.GetData(identifier);
-
-            content.Should().Equal(data);
+            blob.GetHash().Should().Be("5289df737df57326fcdd22597afb1fac");
         }
 
         public void Dispose()

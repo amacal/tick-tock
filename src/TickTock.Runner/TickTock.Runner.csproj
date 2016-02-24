@@ -35,10 +35,14 @@
     <Reference Include="System.IO.Compression.FileSystem" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="JobRuntime.cs" />
+    <Compile Include="JobRunner.cs" />
+    <Compile Include="JobRunnerFactory.cs" />
+    <Compile Include="JobRunnerFactoryContext.cs" />
     <Compile Include="JobTask.cs" />
-    <Compile Include="JobTaskFactory.cs" />
-    <Compile Include="JobTaskManager.cs" />
+    <Compile Include="JobTaskRepository.cs" />
+    <Compile Include="JobTaskRepositoryFactory.cs" />
+    <Compile Include="JobTaskRepositoryFactoryContext.cs" />
+    <Compile Include="JobTaskStatistics.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

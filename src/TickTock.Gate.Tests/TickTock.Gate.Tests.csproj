@@ -74,8 +74,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Modules\BlobsModuleFixture.cs" />
-    <Compile Include="Modules\JobsModuleFixture.cs" />
+    <Compile Include="Modules\BlobsModuleTests.cs" />
+    <Compile Include="Modules\JobsModuleTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

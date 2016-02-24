@@ -8,16 +8,15 @@ namespace TickTock.Gate.Modules
 {
     public class BlobsModule : NancyModule
     {
-        private readonly IBlobRepository repository;
+        private readonly BlobRepository repository;
 
-        public BlobsModule(IBlobRepository repository)
+        public BlobsModule(BlobRepository repository)
             : base("/blobs")
         {
             this.repository = repository;
 
             Post["/"] = parameters => HandlePostBlob();
             Get["/{id}"] = parameters => HandleGetBlob(parameters.Id);
-            Get["/{id}/data"] = parameters => HandleGetBlobData(parameters.Id);
         }
 
         private Response HandlePostBlob()
@@ -28,11 +27,11 @@ namespace TickTock.Gate.Modules
                 memory.Seek(0, SeekOrigin.Begin);
 
                 byte[] content = memory.ToArray();
-                Guid identifier = repository.Add(content);
+                Blob blob = repository.Add(content);
 
                 return Response.AsJson(new
                 {
-                    id = identifier.ToHex()
+                    id = blob.Identifier.ToHex()
                 });
             }
         }
@@ -46,23 +45,9 @@ namespace TickTock.Gate.Modules
 
             return Response.AsJson(new
             {
-                size = blob.Size,
-                hash = blob.Hash
+                size = blob.GetSize(),
+                hash = blob.GetHash()
             });
-        }
-
-        private Response HandleGetBlobData(Guid? identifier)
-        {
-            Blob blob = repository.GetById(identifier.Value);
-
-            if (blob == null)
-                return HttpStatusCode.NotFound;
-
-            byte[] data = repository.GetData(identifier.Value);
-            MemoryStream memory = new MemoryStream(data);
-
-            memory.Seek(0, SeekOrigin.Begin);
-            return Response.FromStream(memory, "application/octet-stream");
         }
     }
 }
