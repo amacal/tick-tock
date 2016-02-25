@@ -15,6 +15,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TickTock.Runner", "TickTock
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TickTock.Runner.Tests", "TickTock.Runner.Tests\TickTock.Runner.Tests.csproj", "{8A9DE28B-D5E3-4155-A20D-D0F1856A294D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TickTock.Service", "TickTock.Service\TickTock.Service.csproj", "{E3D64CCE-6275-4BC9-A79A-A059346D8CA0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TickTock.Driver", "TickTock.Driver\TickTock.Driver.csproj", "{61BE2CE7-2A0C-451F-850E-EAE06FD96CDE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +49,14 @@ Global
 		{8A9DE28B-D5E3-4155-A20D-D0F1856A294D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8A9DE28B-D5E3-4155-A20D-D0F1856A294D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8A9DE28B-D5E3-4155-A20D-D0F1856A294D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E3D64CCE-6275-4BC9-A79A-A059346D8CA0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E3D64CCE-6275-4BC9-A79A-A059346D8CA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E3D64CCE-6275-4BC9-A79A-A059346D8CA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E3D64CCE-6275-4BC9-A79A-A059346D8CA0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{61BE2CE7-2A0C-451F-850E-EAE06FD96CDE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{61BE2CE7-2A0C-451F-850E-EAE06FD96CDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{61BE2CE7-2A0C-451F-850E-EAE06FD96CDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{61BE2CE7-2A0C-451F-850E-EAE06FD96CDE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

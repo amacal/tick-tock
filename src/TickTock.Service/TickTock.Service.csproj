@@ -4,16 +4,16 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{CAC5DCAA-A971-4497-849C-EE7393088DC2}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{E3D64CCE-6275-4BC9-A79A-A059346D8CA0}</ProjectGuid>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>TickTock.Gate</RootNamespace>
-    <AssemblyName>TickTock.Gate</AssemblyName>
+    <RootNamespace>TickTock.Service</RootNamespace>
+    <AssemblyName>TickTock.Service</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -23,6 +23,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -31,27 +32,33 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.CSharp" />
     <Reference Include="Nancy, Version=1.4.2.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Nancy.1.4.3\lib\net40\Nancy.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Newtonsoft.Json.8.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Nancy.Hosting.Self, Version=1.4.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Nancy.Hosting.Self.1.4.1\lib\net40\Nancy.Hosting.Self.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Core\ModelBinder.cs" />
-    <Compile Include="Modules\BlobsModule.cs" />
-    <Compile Include="Modules\JobsModule.cs" />
+    <Compile Include="Bootstrapper.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TickTock.Core\TickTock.Core.csproj">
       <Project>{b1b89e5c-e5df-4bc2-acd2-cc7b741c9885}</Project>
       <Name>TickTock.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TickTock.Gate\TickTock.Gate.csproj">
+      <Project>{cac5dcaa-a971-4497-849c-ee7393088dc2}</Project>
+      <Name>TickTock.Gate</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TickTock.Runner\TickTock.Runner.csproj">
+      <Project>{77759337-23e9-498c-9dd1-de49e7dcd449}</Project>
+      <Name>TickTock.Runner</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

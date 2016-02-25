@@ -1,7 +1,9 @@
 ﻿using Nancy;
 using Nancy.ModelBinding;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace TickTock.Gate.Core
@@ -20,10 +22,22 @@ namespace TickTock.Gate.Core
         {
             return Merge(new IDictionary<string, string>[]
             {
+                GetBody(context),
                 ConvertDynamicDictionary(context.Request.Form),
                 ConvertDynamicDictionary(context.Request.Query),
                 ConvertDynamicDictionary(context.Parameters)
             });
+        }
+
+        private static IDictionary<string, string> GetBody(NancyContext context)
+        {
+            IDictionary<string, string> body = null;
+            if (context.Request.Body != null)
+            {
+                TextReader te = new StreamReader(context.Request.Body);
+                body = JsonConvert.DeserializeObject<Dictionary<string, string>>(te.ReadToEnd());
+            }
+            return body;
         }
 
         private static IDictionary<string, object> Merge(IEnumerable<IDictionary<string, string>> dictionaries)

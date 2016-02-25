@@ -12,10 +12,12 @@ namespace TickTock.Core.Executions
 
         public JobExecutionMetrics Metrics { get; set; }
 
-        public JobExecutionSchedule Schedule { get; set; }
-
         public JobExecutionProgress Progress { get; set; }
 
         public Action<Blob> Deploy { get; set; }
+
+        public Func<JobData, string> GetPath { get; set; }
+
+        public Func<JobSchedule, bool> CanExecuteNext { get; set; }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using TickTock.Core.Blobs;
 using TickTock.Core.Executions;
 using TickTock.Core.Extensions;
@@ -58,13 +59,13 @@ namespace TickTock.Runner
             return () =>
             {
                 Blob blob = context.Blobs.GetById(job.Data.Blob);
-                string path = Path.GetDirectoryName(job.Data.Executable);
+                string executable = execution.GetPath(job.Data);
 
                 ProcessStartInfo info = new ProcessStartInfo
                 {
-                    FileName = job.Data.Executable,
+                    FileName = executable,
                     Arguments = job.Data.Arguments,
-                    WorkingDirectory = path,
+                    WorkingDirectory = Path.GetDirectoryName(executable),
                     CreateNoWindow = true,
                     UseShellExecute = false
                 };
@@ -93,13 +94,13 @@ namespace TickTock.Runner
         {
             return () =>
             {
-                int pid = execution.Progress.GetPid();
-                Process process = Process.GetProcessById(pid);
-
-                return new JobMemoryUsage
+                return OnProcess(execution, process =>
                 {
-                    NonpagedSystemMemorySize = process.NonpagedSystemMemorySize64
-                };
+                    return new JobMemoryUsage
+                    {
+                        NonpagedSystemMemorySize = process.NonpagedSystemMemorySize64
+                    };
+                });
             };
         }
 
@@ -107,15 +108,27 @@ namespace TickTock.Runner
         {
             return () =>
             {
-                int pid = execution.Progress.GetPid();
-                Process process = Process.GetProcessById(pid);
-
-                return new JobProcessorUsage
+                return OnProcess(execution, process =>
                 {
-                    TotalProcessorTime = process.TotalProcessorTime,
-                    UserProcessorTime = process.UserProcessorTime
-                };
+                    return new JobProcessorUsage
+                    {
+                        TotalProcessorTime = process.TotalProcessorTime,
+                        UserProcessorTime = process.UserProcessorTime
+                    };
+                });
             };
+        }
+
+        private static T OnProcess<T>(JobExecution execution, Func<Process, T> callback)
+            where T : class, new()
+        {
+            int pid = execution.Progress.GetPid();
+            Process process = Process.GetProcesses().FirstOrDefault(x => x.Id == pid);
+
+            if (process == null)
+                return new T();
+
+            return callback(process);
         }
     }
 }

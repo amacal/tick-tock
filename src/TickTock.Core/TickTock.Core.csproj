@@ -49,7 +49,6 @@
     <Compile Include="Executions\JobExecutionMetrics.cs" />
     <Compile Include="Executions\JobExecutionProgress.cs" />
     <Compile Include="Executions\JobExecutionRepository.cs" />
-    <Compile Include="Executions\JobExecutionSchedule.cs" />
     <Compile Include="Executions\JobExecutionStatus.cs" />
     <Compile Include="Executions\JobMemoryUsage.cs" />
     <Compile Include="Executions\JobProcessorUsage.cs" />

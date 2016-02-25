@@ -27,11 +27,15 @@ namespace TickTock.Runner
 
                 foreach (Job job in context.Jobs.GetAll())
                 {
-                    JobExecution execution = context.Executions.GetByJob(job.Header).First();
-                    if (execution.Progress.GetStatus() == JobExecutionStatus.Completed)
+                    JobExecution execution = context.Executions.GetByJob(job.Header).FirstOrDefault();
+                    if (execution == null)
                     {
-                        DateTime nextRun = execution.Schedule.Started.Add(job.Schedule.Interval);
-                        if (nextRun < DateTime.Now)
+                        task = context.Tasks.New(job);
+                        task.Start();
+                    }
+                    else if (execution.Progress.GetStatus() == JobExecutionStatus.Completed)
+                    {
+                        if (execution.CanExecuteNext(job.Schedule))
                         {
                             task = context.Tasks.New(job);
                             task.Start();

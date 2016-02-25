@@ -59,8 +59,8 @@ namespace TickTock.Core.Executions
             return job =>
             {
                 Guid identifier = Guid.NewGuid();
-                string name = identifier.ToHex();
-                string prefix = job.Identifier.ToHex();
+                string prefix = identifier.ToHex();
+                string name = job.Identifier.ToHex();
                 int version = job.Version;
 
                 string root = Path.Combine(location, $"{prefix}-{name}-{version}");
@@ -106,14 +106,20 @@ namespace TickTock.Core.Executions
             {
                 Identifier = identifier,
                 Job = header,
-                Progress = new JobExecutionProgress()
+                Progress = new JobExecutionProgress(),
+                Metrics = new JobExecutionMetrics()
             };
 
             execution.Deploy = Deploy(location, execution);
+            execution.GetPath = GetPath(location, execution);
+            execution.CanExecuteNext = CanExecuteNext(location, execution);
             execution.Progress.GetStatus = GetStatus(location, execution);
             execution.Progress.OnScheduled = OnScheduled(location, execution);
             execution.Progress.OnStarted = OnStarted(location, execution);
             execution.Progress.OnCompleted = OnCompleted(location, execution);
+            execution.Progress.GetPid = GetPid(location, execution);
+            execution.Metrics.OnMemory = OnMemory(location, execution);
+            execution.Metrics.OnProcessor = OnProcessor(location, execution);
 
             return execution;
         }
@@ -126,6 +132,35 @@ namespace TickTock.Core.Executions
                 string path = Path.Combine(root, "blob");
 
                 blob.DeployTo(path);
+            };
+        }
+
+        private static Func<JobData, string> GetPath(string location, JobExecution execution)
+        {
+            return data =>
+            {
+                string root = GetRootPath(location, execution);
+                string path = Path.Combine(root, "blob", data.Executable);
+
+                return path;
+            };
+        }
+
+        private static Func<JobSchedule, bool> CanExecuteNext(string location, JobExecution execution)
+        {
+            return schedule =>
+            {
+                if (schedule == null)
+                    return false;
+
+                string root = GetRootPath(location, execution);
+                string path = Path.Combine(root, "metadata");
+                string file = Path.Combine(path, ".completed");
+
+                if (File.Exists(file) == false)
+                    return false;
+
+                return File.GetCreationTime(file).Add(schedule.Interval) < DateTime.Now;
             };
         }
 
@@ -165,6 +200,32 @@ namespace TickTock.Core.Executions
             };
         }
 
+        private static Func<int> GetPid(string location, JobExecution execution)
+        {
+            return () =>
+            {
+                string root = GetRootPath(location, execution);
+                string path = Path.Combine(root, "metadata");
+                string file = Path.Combine(path, ".pid");
+
+                return Int32.Parse(File.ReadAllText(file));
+            };
+        }
+
+        private static Action<JobMemoryUsage> OnMemory(string location, JobExecution execution)
+        {
+            return usage =>
+            {
+            };
+        }
+
+        private static Action<JobProcessorUsage> OnProcessor(string location, JobExecution execution)
+        {
+            return usage =>
+            {
+            };
+        }
+
         private static Func<JobExecutionStatus> GetStatus(string location, JobExecution execution)
         {
             return () =>
@@ -187,8 +248,8 @@ namespace TickTock.Core.Executions
 
         private static string GetRootPath(string location, JobExecution execution)
         {
-            string name = execution.Identifier.ToHex();
-            string prefix = execution.Job.Identifier.ToHex();
+            string prefix = execution.Identifier.ToHex();
+            string name = execution.Job.Identifier.ToHex();
             int version = execution.Job.Version;
 
             return Path.Combine(location, $"{prefix}-{name}-{version}");

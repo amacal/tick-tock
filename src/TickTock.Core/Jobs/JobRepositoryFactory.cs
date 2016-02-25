@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -23,14 +24,17 @@ namespace TickTock.Core.Jobs
 
         private static Func<Job[]> GetAll(string location)
         {
-            return null;
+            return () =>
+            {
+                return GetByPredicate(location, i => true).ToArray();
+            };
         }
 
         private static Func<Guid, Job> GetById(string location)
         {
             return identifier =>
             {
-                return GetByPredicate(location, identifier, i => true);
+                return GetByPredicate(location, i => i.Identifier == identifier).FirstOrDefault();
             };
         }
 
@@ -38,30 +42,27 @@ namespace TickTock.Core.Jobs
         {
             return (identifier, version) =>
             {
-                return GetByPredicate(location, identifier, i => i.Version == version);
+                return GetByPredicate(location, i => i.Identifier == identifier && i.Version == version).FirstOrDefault();
             };
         }
 
-        private static Job GetByPredicate(string location, Guid identifier, Func<JobFileEntry, bool> predicate)
+        private static IEnumerable<Job> GetByPredicate(string location, Func<JobFileEntry, bool> predicate)
         {
-            string name = identifier.ToHex();
-            JobFileEntry current = GetInfo(location, name).FirstOrDefault(predicate);
-
-            if (current == null)
-                return null;
-
-            string content = File.ReadAllText(current.Path);
-            JobHeader header = new JobHeader
+            foreach (JobFileEntry entry in GetInfo(location, predicate))
             {
-                Identifier = identifier,
-                Version = current.Version
-            };
+                string content = File.ReadAllText(entry.Path);
+                JobHeader header = new JobHeader
+                {
+                    Identifier = entry.Identifier,
+                    Version = entry.Version
+                };
 
-            return new Job
-            {
-                Header = header,
-                Data = JsonConvert.DeserializeObject<JobData>(content)
-            };
+                yield return new Job
+                {
+                    Header = header,
+                    Data = JsonConvert.DeserializeObject<JobData>(content)
+                };
+            }
         }
 
         private static Func<JobData, JobHeader> Add(string location)
@@ -85,7 +86,7 @@ namespace TickTock.Core.Jobs
             int version = 1;
             string name = identifier.ToHex();
 
-            JobFileEntry[] info = GetInfo(location, name);
+            JobFileEntry[] info = GetInfo(location, x => x.Identifier == identifier);
             JobFileEntry current = info.FirstOrDefault();
 
             if (current != null)
@@ -102,10 +103,10 @@ namespace TickTock.Core.Jobs
             return header;
         }
 
-        private static JobFileEntry[] GetInfo(string location, string identifier)
+        private static JobFileEntry[] GetInfo(string location, Func<JobFileEntry, bool> predicate)
         {
-            Regex regex = new Regex(@"\-(?<version>[0-9]+)$");
-            string[] files = Directory.GetFiles(location, $"{identifier}-*");
+            Regex regex = new Regex(@"(?<identifier>[a-z0-9]{32})\-(?<version>[0-9]+)$");
+            string[] files = Directory.GetFiles(location, "*-*");
 
             var query = from file in files
                         let match = regex.Match(file)
@@ -113,10 +114,11 @@ namespace TickTock.Core.Jobs
                         select new JobFileEntry
                         {
                             Path = file,
+                            Identifier = Guid.Parse(match.Groups["identifier"].Value),
                             Version = Int32.Parse(match.Groups["version"].Value)
                         };
 
-            return query.OrderByDescending(x => x.Version).ToArray();
+            return query.Where(predicate).OrderByDescending(x => x.Version).ToArray();
         }
     }
 }
