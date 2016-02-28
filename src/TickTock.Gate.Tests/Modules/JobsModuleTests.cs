@@ -43,7 +43,7 @@ namespace TickTock.Gate.Tests.Modules
             BrowserResponse response;
             PostJobRequest request = new PostJobRequest();
 
-            response = browser.Post("/jobs", with =>
+            response = browser.Post("/api/jobs", with =>
             {
                 with.JsonBody(request);
             });
@@ -57,7 +57,7 @@ namespace TickTock.Gate.Tests.Modules
             BrowserResponse response;
             PostJobRequest request = new PostJobRequest();
 
-            response = browser.Post("/jobs", with =>
+            response = browser.Post("/api/jobs", with =>
             {
                 with.JsonBody(request);
             });
@@ -71,7 +71,7 @@ namespace TickTock.Gate.Tests.Modules
             BrowserResponse response;
             PostJobRequest request = new PostJobRequest();
 
-            response = browser.Post("/jobs", with =>
+            response = browser.Post("/api/jobs", with =>
             {
                 with.JsonBody(request);
             });
@@ -84,7 +84,7 @@ namespace TickTock.Gate.Tests.Modules
         {
             string id = Guid.NewGuid().ToHex();
 
-            BrowserResponse response = browser.Get($"/jobs/{id}", with =>
+            BrowserResponse response = browser.Get($"/api/jobs/{id}", with =>
             {
             });
 
@@ -96,7 +96,7 @@ namespace TickTock.Gate.Tests.Modules
         {
             string id = Jobs.SampleHeader.Identifier.ToHex();
 
-            BrowserResponse response = browser.Get($"/jobs/{id}", with =>
+            BrowserResponse response = browser.Get($"/api/jobs/{id}", with =>
             {
             });
 
@@ -108,7 +108,7 @@ namespace TickTock.Gate.Tests.Modules
         {
             string id = Jobs.SampleHeader.Identifier.ToHex();
 
-            BrowserResponse response = browser.Get($"/jobs/{id}", with =>
+            BrowserResponse response = browser.Get($"/api/jobs/{id}", with =>
             {
             });
 
@@ -130,7 +130,7 @@ namespace TickTock.Gate.Tests.Modules
                 blob = Jobs.SampleData.Blob.ToHex()
             };
 
-            BrowserResponse response = browser.Get($"/jobs/{id}", with =>
+            BrowserResponse response = browser.Get($"/api/jobs/{id}", with =>
             {
             });
 

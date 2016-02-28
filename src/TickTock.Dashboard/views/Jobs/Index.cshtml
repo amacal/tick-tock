@@ -1,0 +1,32 @@
+﻿@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<TickTock.Dashboard.Models.Jobs.IndexModel>
+
+@{
+    Layout = "Layout.cshtml";
+}
+
+@section Content
+{
+    <div class="container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th class="col-lg-4">id</th>
+                    <th class="col-lg-4">version</th>
+                    <th class="col-lg-4">name</th>
+                </tr>
+            </thead>
+
+            @foreach (var job in Model.Jobs)
+            {
+                <tbody>
+                    <tr>
+                        <th>@job.Id</th>
+                        <th>@job.Version</th>
+                        <th>@job.Name</th>
+                    </tr>
+                </tbody>
+            }
+
+        </table>
+    </div>
+}

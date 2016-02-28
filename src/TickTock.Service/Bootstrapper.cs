@@ -1,5 +1,7 @@
 ﻿using Nancy;
+using Nancy.Bootstrapper;
 using Nancy.TinyIoc;
+using Nancy.ViewEngines;
 using System.IO;
 using TickTock.Core.Blobs;
 using TickTock.Core.Executions;
@@ -23,6 +25,17 @@ namespace TickTock.Service
             container.Register(BlobRepositoryFactory.Create(Path.Combine(location, "blobs")));
             container.Register(JobExecutionRepositoryFactory.Create(Path.Combine(location, "executions")));
             container.Register(JobRepositoryFactory.Create(Path.Combine(location, "jobs")));
+        }
+
+        protected override NancyInternalConfiguration InternalConfiguration
+        {
+            get
+            {
+                return NancyInternalConfiguration.WithOverrides(with =>
+                {
+                    with.ViewLocationProvider = typeof(ResourceViewLocationProvider);
+                });
+            }
         }
     }
 }

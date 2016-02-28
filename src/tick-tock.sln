@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TickTock.Service", "TickToc
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TickTock.Driver", "TickTock.Driver\TickTock.Driver.csproj", "{61BE2CE7-2A0C-451F-850E-EAE06FD96CDE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TickTock.Dashboard", "TickTock.Dashboard\TickTock.Dashboard.csproj", "{A43D2D68-C2EC-4309-9987-0BB03CE9791E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +59,10 @@ Global
 		{61BE2CE7-2A0C-451F-850E-EAE06FD96CDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{61BE2CE7-2A0C-451F-850E-EAE06FD96CDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{61BE2CE7-2A0C-451F-850E-EAE06FD96CDE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A43D2D68-C2EC-4309-9987-0BB03CE9791E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A43D2D68-C2EC-4309-9987-0BB03CE9791E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A43D2D68-C2EC-4309-9987-0BB03CE9791E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A43D2D68-C2EC-4309-9987-0BB03CE9791E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

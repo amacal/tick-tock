@@ -11,7 +11,7 @@ namespace TickTock.Gate.Modules
         private readonly JobRepository repository;
 
         public JobsModule(JobRepository repository)
-            : base("/jobs")
+            : base("/api/jobs")
         {
             this.repository = repository;
 

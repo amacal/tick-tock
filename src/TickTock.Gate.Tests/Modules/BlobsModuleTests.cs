@@ -41,7 +41,7 @@ namespace TickTock.Gate.Tests.Modules
         {
             BrowserResponse response;
 
-            response = browser.Post("/blobs", with =>
+            response = browser.Post("/api/blobs", with =>
             {
                 with.Body("ABCD", "application/octet-stream");
             });
@@ -54,7 +54,7 @@ namespace TickTock.Gate.Tests.Modules
         {
             BrowserResponse response;
 
-            response = browser.Post("/blobs", with =>
+            response = browser.Post("/api/blobs", with =>
             {
                 with.Body("ABCD", "application/octet-stream");
             });
@@ -65,7 +65,7 @@ namespace TickTock.Gate.Tests.Modules
         [Fact]
         public void PostingNewBlobShouldReturnItsIdentifier()
         {
-            BrowserResponse response = browser.Post("/blobs", with =>
+            BrowserResponse response = browser.Post("/api/blobs", with =>
             {
                 with.Body("ABCD", "application/octet-stream");
             });
@@ -78,7 +78,7 @@ namespace TickTock.Gate.Tests.Modules
         {
             string id = Blobs.SampleId;
 
-            BrowserResponse response = browser.Get($"/blobs/{id}", with =>
+            BrowserResponse response = browser.Get($"/api/blobs/{id}", with =>
             {
             });
 
@@ -90,7 +90,7 @@ namespace TickTock.Gate.Tests.Modules
         {
             string id = Blobs.SampleId;
 
-            BrowserResponse response = browser.Get($"/blobs/{id}", with =>
+            BrowserResponse response = browser.Get($"/api/blobs/{id}", with =>
             {
             });
 
@@ -103,7 +103,7 @@ namespace TickTock.Gate.Tests.Modules
             int size = Blobs.SampleData.Length;
             string id = Blobs.SampleId;
 
-            BrowserResponse response = browser.Get($"/blobs/{id}", with =>
+            BrowserResponse response = browser.Get($"/api/blobs/{id}", with =>
             {
             });
 
@@ -116,7 +116,7 @@ namespace TickTock.Gate.Tests.Modules
             string hash = Blobs.SampleHash;
             string id = Blobs.SampleId;
 
-            BrowserResponse response = browser.Get($"/blobs/{id}", with =>
+            BrowserResponse response = browser.Get($"/api/blobs/{id}", with =>
             {
             });
 
@@ -128,19 +128,7 @@ namespace TickTock.Gate.Tests.Modules
         {
             string id = "5129ac3c07e346269f55cbfb086f3e59";
 
-            BrowserResponse response = browser.Get($"/blobs/{id}", with =>
-            {
-            });
-
-            response.StatusCode.Should().Be(HttpStatusCode.NotFound);
-        }
-
-        [Fact]
-        public void GettingNotExistingBlobDataShouldReturn404()
-        {
-            string id = "5129ac3c07e346269f55cbfb086f3e59";
-
-            BrowserResponse response = browser.Get($"/blobs/{id}/data", with =>
+            BrowserResponse response = browser.Get($"/api/blobs/{id}", with =>
             {
             });
 

@@ -11,7 +11,7 @@ namespace TickTock.Gate.Modules
         private readonly BlobRepository repository;
 
         public BlobsModule(BlobRepository repository)
-            : base("/blobs")
+            : base("/api/blobs")
         {
             this.repository = repository;
 
