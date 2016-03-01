@@ -1,6 +1,7 @@
 ﻿using Nancy;
 using Nancy.ModelBinding;
 using System;
+using System.Collections.Generic;
 using TickTock.Core.Extensions;
 using TickTock.Core.Jobs;
 
@@ -15,7 +16,7 @@ namespace TickTock.Gate.Modules
         {
             this.repository = repository;
 
-            Get["/"] = parameters => HttpStatusCode.OK;
+            Get["/"] = parameters => HandleGetAllJobs();
             Post["/"] = parameters => HandlePostJob(this.Bind<DynamicDictionary>());
             Get["/{job}"] = parameters => HandleGetJob(parameters.job);
             Patch["/{job}"] = parameters => HttpStatusCode.OK;
@@ -31,6 +32,28 @@ namespace TickTock.Gate.Modules
             Get["/{job}/executions"] = parameters => HttpStatusCode.OK;
             Get["/{job}/executions/newest"] = parameters => HttpStatusCode.OK;
             Get["/{job}/executions/{execution}"] = parameters => HttpStatusCode.OK;
+        }
+
+        private Response HandleGetAllJobs()
+        {
+            Job[] jobs = repository.GetAll();
+            List<object> model = new List<object>(jobs.Length);
+
+            foreach (Job job in jobs)
+            {
+                model.Add(new
+                {
+                    id = job.Header.Identifier.ToHex(),
+                    version = job.Header.Version,
+                    name = job.Data.Name,
+                    description = job.Data.Description,
+                    executable = job.Data.Executable,
+                    arguments = job.Data.Arguments,
+                    blob = job.Data.Blob.ToHex()
+                });
+            }
+
+            return Response.AsJson(model);
         }
 
         public Response HandlePostJob(dynamic model)
