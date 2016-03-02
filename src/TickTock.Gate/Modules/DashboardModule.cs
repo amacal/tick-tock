@@ -1,5 +1,4 @@
 ﻿using Nancy;
-using Nancy.Responses.Negotiation;
 using System;
 using System.IO;
 using System.Reflection;
@@ -13,11 +12,20 @@ namespace TickTock.Gate.Modules
         {
             Get["/"] = parameters => GetDashboardView();
             Get["/application.js"] = parameters => GetDashboardScript();
+            Get["/application.css"] = parameters => GetDashboardStyles();
         }
 
-        private Negotiator GetDashboardView()
+        private Response GetDashboardView()
         {
-            return View["Dashboard"];
+            Func<Stream> stream = () =>
+            {
+                Assembly assembly = typeof(DashboardModule).Assembly;
+                string resource = "TickTock.Gate.Application.Dashboard.xhtml";
+
+                return assembly.GetManifestResourceStream(resource);
+            };
+
+            return Response.FromStream(stream, "text/html");
         }
 
         private Response GetDashboardScript()
@@ -25,12 +33,25 @@ namespace TickTock.Gate.Modules
             Func<Stream> stream = () =>
             {
                 Assembly assembly = typeof(DashboardModule).Assembly;
-                string resource = "TickTock.Gate.Scripts.Dashboard.js";
+                string resource = "TickTock.Gate.Application.Dashboard.js";
 
                 return assembly.GetManifestResourceStream(resource);
             };
 
-            return Response.FromStream(stream, "application/javascript");
+            return Response.FromStream(stream, "text/javascript");
+        }
+
+        private Response GetDashboardStyles()
+        {
+            Func<Stream> stream = () =>
+            {
+                Assembly assembly = typeof(DashboardModule).Assembly;
+                string resource = "TickTock.Gate.Application.Dashboard.css";
+
+                return assembly.GetManifestResourceStream(resource);
+            };
+
+            return Response.FromStream(stream, "text/css");
         }
     }
 }

@@ -59,14 +59,15 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
     <None Include="packages.config" />
-    <EmbeddedResource Include="Views\Dashboard.cshtml" />
+    <EmbeddedResource Include="Application\Dashboard.xhtml" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Scripts\Dashboard.js" />
+    <EmbeddedResource Include="Application\Dashboard.js" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="Application\Dashboard.css" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
