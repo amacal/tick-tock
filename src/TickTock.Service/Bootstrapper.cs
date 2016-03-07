@@ -22,9 +22,17 @@ namespace TickTock.Service
         {
             base.ConfigureApplicationContainer(container);
 
-            container.Register(BlobRepositoryFactory.Create(Path.Combine(location, "blobs")));
+            container.Register(BlobRepositoryFactory.Create(with =>
+            {
+                with.Location = Path.Combine(location, "blobs");
+            }));
+
             container.Register(JobExecutionRepositoryFactory.Create(Path.Combine(location, "executions")));
-            container.Register(JobRepositoryFactory.Create(Path.Combine(location, "jobs")));
+
+            container.Register(JobRepositoryFactory.Create(with =>
+            {
+                with.Location = Path.Combine(location, "jobs");
+            }));
         }
 
         protected override NancyInternalConfiguration InternalConfiguration

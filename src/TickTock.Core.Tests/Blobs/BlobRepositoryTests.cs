@@ -1,7 +1,10 @@
 ﻿using F2F.Sandbox;
 using FluentAssertions;
 using System;
+using System.IO;
+using System.IO.Compression;
 using TickTock.Core.Blobs;
+using TickTock.Core.Extensions;
 using Xunit;
 
 namespace TickTock.Core.Tests.Blobs
@@ -14,60 +17,151 @@ namespace TickTock.Core.Tests.Blobs
         public BlobRepositoryTests()
         {
             sandbox = new FileSandbox(new EmptyFileLocator());
-            repository = BlobRepositoryFactory.Create(sandbox.Directory);
+            repository = BlobRepositoryFactory.Create(with =>
+            {
+                with.Location = sandbox.Directory;
+            });
         }
 
-        [Fact]
-        public void AddingBlobShouldGenerateNewGuid()
+        public class AddingBlob : BlobRepositoryTests
         {
-            byte[] data = { 0x01, 0x02, 0x03 };
+            [Fact]
+            public void ShouldGenerateNewGuid()
+            {
+                byte[] data = GetSampleZipFile();
 
-            Blob blob = repository.Add(data);
+                Blob blob = repository.Create(data).GetBlob();
 
-            blob.Identifier.Should().NotBeEmpty();
+                blob.Identifier.Should().NotBeEmpty();
+            }
+
+            [Fact]
+            public void OutOfTheZipFileShouldNotCreateBlob()
+            {
+                byte[] data = GetSampleUnknownFile();
+
+                BlobCreation creation = repository.Create(data);
+
+                creation.Success.Should().BeFalse();
+            }
         }
 
-        [Fact]
-        public void RequestingNotAddedBlobShouldReturnNull()
+        public class RequestingBlob : BlobRepositoryTests
         {
-            Guid identifier = Guid.NewGuid();
+            [Fact]
+            public void ShouldReturnItsIdentifier()
+            {
+                Guid identifier = NewBlob().Identifier;
 
-            Blob blob = repository.GetById(identifier);
+                Blob blob = repository.GetById(identifier);
 
-            blob.Should().BeNull();
+                blob.Identifier.Should().Be(identifier);
+            }
+
+            [Fact]
+            public void WhichIsNotAddedBlobShouldReturnNull()
+            {
+                Guid identifier = Guid.NewGuid();
+
+                Blob blob = repository.GetById(identifier);
+
+                blob.Should().BeNull();
+            }
         }
 
-        [Fact]
-        public void RequestingAddedBlobShouldReturnItsIdentifier()
+        public class ReturnedBlob : BlobRepositoryTests
         {
-            byte[] data = { 0x01, 0x02, 0x03 };
-            Blob added = repository.Add(data);
+            [Fact]
+            public void ShouldReturnItsSize()
+            {
+                byte[] data;
+                Blob blob = NewBlob(out data);
 
-            Blob blob = repository.GetById(added.Identifier);
+                blob.GetSize().Should().Be(data.Length);
+            }
 
-            blob.Identifier.Should().Be(added.Identifier);
+            [Fact]
+            public void ShouldReturnItsHash()
+            {
+                byte[] data;
+                Blob blob = NewBlob(out data);
+
+                blob.GetHash().Should().Be(data.ToHash());
+            }
+
+            [Fact]
+            public void ShouldReturnItsFiles()
+            {
+                Blob blob = NewBlob();
+
+                blob.GetFiles().Should().ContainSingle(x =>
+                    x.Name == "file" && x.Path == "file");
+            }
         }
 
-        [Fact]
-        public void RequestingAddedBlobShouldReturnItsSize()
+        public class Deploying : BlobRepositoryTests
         {
-            byte[] data = { 0x01, 0x02, 0x03 };
-            Blob added = repository.Add(data);
+            [Fact]
+            public void ShouldReturnPath()
+            {
+                Blob blob = NewBlob();
+                BlobDeployment deployment;
 
-            Blob blob = repository.GetById(added.Identifier);
+                using (FileSandbox sandbox = new FileSandbox(new EmptyFileLocator()))
+                {
+                    deployment = blob.DeployTo(sandbox.Directory);
+                    deployment.Path.Should().Be(sandbox.Directory);
+                }
+            }
 
-            blob.GetSize().Should().Be(3);
+            [Fact]
+            public void ShouldReturnAllFiles()
+            {
+                Blob blob = NewBlob();
+                BlobDeployment deployment;
+
+                using (FileSandbox sandbox = new FileSandbox(new EmptyFileLocator()))
+                {
+                    deployment = blob.DeployTo(sandbox.Directory);
+                    deployment.Files.Should().ContainSingle(x =>
+                        x.Name == "file" && x.Path == Path.Combine(deployment.Path, "file"));
+                }
+            }
         }
 
-        [Fact]
-        public void RequestingAddedBlobShouldReturnItsHash()
+        private Blob NewBlob()
         {
-            byte[] data = { 0x01, 0x02, 0x03 };
-            Blob added = repository.Add(data);
+            byte[] data;
+            return NewBlob(out data);
+        }
 
-            Blob blob = repository.GetById(added.Identifier);
+        private Blob NewBlob(out byte[] data)
+        {
+            data = GetSampleZipFile();
+            Blob added = repository.Create(data).GetBlob();
 
-            blob.GetHash().Should().Be("5289df737df57326fcdd22597afb1fac");
+            return added;
+        }
+
+        private static byte[] GetSampleZipFile()
+        {
+            using (MemoryStream stream = new MemoryStream())
+            {
+                using (ZipArchive archive = new ZipArchive(stream, ZipArchiveMode.Create))
+                {
+                    using (Stream entry = archive.CreateEntry("file").Open())
+                    {
+                        entry.Write(new byte[] { 0x01, 0x02, 0x03 }, 0, 3);
+                    }
+                }
+
+                return stream.ToArray();
+            }
+        }
+
+        private static byte[] GetSampleUnknownFile()
+        {
+            return new byte[] { 0x01, 0x02, 0x03 };
         }
 
         public void Dispose()

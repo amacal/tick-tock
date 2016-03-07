@@ -14,7 +14,10 @@ namespace TickTock.Core.Tests.Jobs
         public JobRepositoryTests()
         {
             sandbox = new FileSandbox(new EmptyFileLocator());
-            repository = JobRepositoryFactory.Create(sandbox.Directory);
+            repository = JobRepositoryFactory.Create(with =>
+            {
+                with.Location = sandbox.Directory;
+            });
         }
 
         [Fact]
@@ -67,7 +70,10 @@ namespace TickTock.Core.Tests.Jobs
             JobData data = Jobs.TickTockData;
             JobHeader created = repository.Add(data);
 
-            Job job = repository.GetById(created.Identifier);
+            Job job = repository.Single(with =>
+            {
+                with.Identifier = created.Identifier;
+            });
 
             job.Header.Identifier.Should().Be(created.Identifier);
         }
@@ -78,7 +84,10 @@ namespace TickTock.Core.Tests.Jobs
             JobData data = Jobs.TickTockData;
             JobHeader created = repository.Add(data);
 
-            Job job = repository.GetById(created.Identifier);
+            Job job = repository.Single(with =>
+            {
+                with.Identifier = created.Identifier;
+            });
 
             job.Data.ShouldBeEquivalentTo(data);
         }
@@ -88,7 +97,10 @@ namespace TickTock.Core.Tests.Jobs
         {
             Guid identifier = Guid.NewGuid();
 
-            Job job = repository.GetById(identifier);
+            Job job = repository.Single(with =>
+            {
+                with.Identifier = identifier;
+            });
 
             job.Should().BeNull();
         }
@@ -102,7 +114,11 @@ namespace TickTock.Core.Tests.Jobs
             JobData upgrade = Jobs.TickTockDataV2;
             JobHeader header = repository.Update(created.Identifier, upgrade);
 
-            Job job = repository.GetById(created.Identifier);
+            Job job = repository.Single(with =>
+            {
+                with.Identifier = created.Identifier;
+                with.Version = header.Version;
+            });
 
             job.Data.ShouldBeEquivalentTo(upgrade);
         }
@@ -116,7 +132,11 @@ namespace TickTock.Core.Tests.Jobs
             JobData upgrade = Jobs.TickTockDataV2;
             JobHeader header = repository.Update(created.Identifier, upgrade);
 
-            Job job = repository.GetByIdAndVersion(created.Identifier, created.Version);
+            Job job = repository.Single(with =>
+            {
+                with.Identifier = created.Identifier;
+                with.Version = created.Version;
+            });
 
             job.Data.ShouldBeEquivalentTo(data);
         }
@@ -127,7 +147,11 @@ namespace TickTock.Core.Tests.Jobs
             JobData data = Jobs.TickTockData;
             JobHeader created = repository.Add(data);
 
-            Job job = repository.GetByIdAndVersion(created.Identifier, created.Version + 1);
+            Job job = repository.Single(with =>
+            {
+                with.Identifier = created.Identifier;
+                with.Version = created.Version + 1;
+            });
 
             job.Should().BeNull();
         }

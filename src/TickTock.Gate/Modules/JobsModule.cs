@@ -2,6 +2,8 @@
 using Nancy.ModelBinding;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using TickTock.Core.Executions;
 using TickTock.Core.Extensions;
 using TickTock.Core.Jobs;
 
@@ -9,12 +11,14 @@ namespace TickTock.Gate.Modules
 {
     public class JobsModule : NancyModule
     {
-        private readonly JobRepository repository;
+        private readonly JobRepository jobs;
+        private readonly JobExecutionRepository executions;
 
-        public JobsModule(JobRepository repository)
+        public JobsModule(JobRepository jobs, JobExecutionRepository executions)
             : base("/api/jobs")
         {
-            this.repository = repository;
+            this.jobs = jobs;
+            this.executions = executions;
 
             Get["/"] = parameters => HandleGetAllJobs();
             Post["/"] = parameters => HandlePostJob(this.Bind<DynamicDictionary>());
@@ -36,11 +40,14 @@ namespace TickTock.Gate.Modules
 
         private Response HandleGetAllJobs()
         {
-            Job[] jobs = repository.GetAll();
-            List<object> model = new List<object>(jobs.Length);
+            Job[] all = jobs.All(with => { });
+            List<object> model = new List<object>(all.Length);
 
-            foreach (Job job in jobs)
+            foreach (Job job in all)
             {
+                JobExecution execution = executions.GetByJob(job.Header).FirstOrDefault();
+                DateTime? nextRun = execution != null ? execution.NextRun(job.Schedule) : job.Schedule.Next(null);
+
                 model.Add(new
                 {
                     id = job.Header.Identifier.ToHex(),
@@ -49,7 +56,8 @@ namespace TickTock.Gate.Modules
                     description = job.Data.Description,
                     executable = job.Data.Executable,
                     arguments = job.Data.Arguments,
-                    blob = job.Data.Blob.ToHex()
+                    blob = job.Data.Blob.ToHex(),
+                    nextRun = nextRun
                 });
             }
 
@@ -67,7 +75,7 @@ namespace TickTock.Gate.Modules
                 Blob = model.blob
             };
 
-            JobHeader header = repository.Add(data);
+            JobHeader header = jobs.Add(data);
             Guid identifier = header.Identifier;
 
             return Response.AsJson(new
@@ -78,7 +86,10 @@ namespace TickTock.Gate.Modules
 
         public Response HandleGetJob(Guid? identifier)
         {
-            Job job = repository.GetById(identifier.Value);
+            Job job = jobs.Single(with =>
+            {
+                with.Identifier = identifier.Value;
+            });
 
             if (job == null)
                 return HttpStatusCode.NotFound;

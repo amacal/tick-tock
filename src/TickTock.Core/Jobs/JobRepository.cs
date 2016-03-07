@@ -4,11 +4,9 @@ namespace TickTock.Core.Jobs
 {
     public class JobRepository
     {
-        public Func<Job[]> GetAll { get; set; }
+        public Func<Action<JobCriteria>, Job[]> All { get; set; }
 
-        public Func<Guid, Job> GetById { get; set; }
-
-        public Func<Guid, int, Job> GetByIdAndVersion { get; set; }
+        public Func<Action<JobCriteria>, Job> Single { get; set; }
 
         public Func<JobData, JobHeader> Add { get; set; }
 

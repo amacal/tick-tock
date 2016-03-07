@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -48,8 +49,7 @@ namespace TickTock.Runner
             };
 
             task.Start = Start(context, execution, task, job);
-            task.Statistics.GetMemory = GetMemory(execution, task, job);
-            task.Statistics.GetProcessor = GetProcessor(execution, task, job);
+            task.Statistics.Publish = PublishStatistics(execution, task, job);
 
             return task;
         }
@@ -82,53 +82,60 @@ namespace TickTock.Runner
                     process.Dispose();
                 };
 
-                execution.Deploy(blob);
+                BlobDeployment deployment = execution.Deploy(blob);
+                if (deployment == null)
+                {
+                    execution.Progress.OnFailed("Blob deployment failed.");
+                    return;
+                }
+
                 execution.Progress.OnScheduled();
 
-                process.Start();
+                try
+                {
+                    if (process.Start() == false)
+                    {
+                        execution.Progress.OnFailed("Process starting failed.");
+                        return;
+                    }
+                }
+                catch (Win32Exception ex)
+                {
+                    execution.Progress.OnFailed($"Process starting failed: {ex.Message}");
+                    return;
+                }
+
                 execution.Progress.OnStarted(process.Id);
             };
         }
 
-        private static Func<JobMemoryUsage> GetMemory(JobExecution execution, JobTask task, Job job)
+        private static Action PublishStatistics(JobExecution execution, JobTask task, Job job)
         {
             return () =>
             {
-                return OnProcess(execution, process =>
+                OnProcess(execution, process =>
                 {
-                    return new JobMemoryUsage
+                    execution.Metrics.OnMemory(new JobMemoryUsage
                     {
                         NonpagedSystemMemorySize = process.NonpagedSystemMemorySize64
-                    };
-                });
-            };
-        }
+                    });
 
-        private static Func<JobProcessorUsage> GetProcessor(JobExecution execution, JobTask task, Job job)
-        {
-            return () =>
-            {
-                return OnProcess(execution, process =>
-                {
-                    return new JobProcessorUsage
+                    execution.Metrics.OnProcessor(new JobProcessorUsage
                     {
                         TotalProcessorTime = process.TotalProcessorTime,
                         UserProcessorTime = process.UserProcessorTime
-                    };
+                    });
                 });
             };
         }
 
-        private static T OnProcess<T>(JobExecution execution, Func<Process, T> callback)
-            where T : class, new()
+        private static void OnProcess(JobExecution execution, Action<Process> callback)
         {
             int pid = execution.Progress.GetPid();
             Process process = Process.GetProcesses().FirstOrDefault(x => x.Id == pid);
 
-            if (process == null)
-                return new T();
-
-            return callback(process);
+            if (process != null)
+                callback(process);
         }
     }
 }

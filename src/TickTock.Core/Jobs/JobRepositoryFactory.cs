@@ -4,84 +4,79 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using TickTock.Core.Core;
 using TickTock.Core.Extensions;
 
 namespace TickTock.Core.Jobs
 {
     public static class JobRepositoryFactory
     {
-        public static JobRepository Create(string location)
+        public static JobRepository Create(Action<JobRepositoryFactoryContext> with)
         {
-            return new JobRepository
+            return with.Apply(context =>
             {
-                Add = Add(location),
-                GetAll = GetAll(location),
-                GetById = GetById(location),
-                GetByIdAndVersion = GetByIdAndVersion(location),
-                Update = Update(location)
-            };
-        }
-
-        private static Func<Job[]> GetAll(string location)
-        {
-            return () =>
-            {
-                return GetByPredicate(location, i => true).ToArray();
-            };
-        }
-
-        private static Func<Guid, Job> GetById(string location)
-        {
-            return identifier =>
-            {
-                return GetByPredicate(location, i => i.Identifier == identifier).FirstOrDefault();
-            };
-        }
-
-        private static Func<Guid, int, Job> GetByIdAndVersion(string location)
-        {
-            return (identifier, version) =>
-            {
-                return GetByPredicate(location, i => i.Identifier == identifier && i.Version == version).FirstOrDefault();
-            };
-        }
-
-        private static IEnumerable<Job> GetByPredicate(string location, Func<JobFileEntry, bool> predicate)
-        {
-            foreach (JobFileEntry entry in GetInfo(location, predicate))
-            {
-                string content = File.ReadAllText(entry.Path);
-                JobHeader header = new JobHeader
+                return new JobRepository
                 {
-                    Identifier = entry.Identifier,
-                    Version = entry.Version
+                    Add = Add(context),
+                    All = All(context),
+                    Single = Single(context),
+                    Update = Update(context)
                 };
+            });
+        }
 
-                yield return new Job
+        private static Func<Action<JobCriteria>, Job[]> All(JobRepositoryFactoryContext context)
+        {
+            return callback => Get(context, callback).ToArray();
+        }
+
+        private static Func<Action<JobCriteria>, Job> Single(JobRepositoryFactoryContext context)
+        {
+            return callback => Get(context, callback).SingleOrDefault();
+        }
+
+        private static IEnumerable<Job> Get(JobRepositoryFactoryContext context, Action<JobCriteria> callback)
+        {
+            JobCriteria criteria = new JobCriteria
+            {
+                Identifier = Criteria<Guid>.Nothing,
+                Version = Criteria<int>.Nothing
+            };
+
+            Func<JobFileEntry, bool> predicate = entry =>
+            {
+                return criteria.Identifier.Is(entry.Identifier)
+                    && criteria.Version.Is(entry.Version);
+            };
+
+            callback(criteria);
+
+            foreach (JobFileEntry entry in GetInfo(context.Location, predicate))
+            {
+                yield return JobFactory.Create(with =>
                 {
-                    Header = header,
-                    Data = JsonConvert.DeserializeObject<JobData>(content)
-                };
+                    with.Entry = entry;
+                });
             }
         }
 
-        private static Func<JobData, JobHeader> Add(string location)
+        private static Func<JobData, JobHeader> Add(JobRepositoryFactoryContext context)
         {
             return data =>
             {
-                return Add(location, Guid.NewGuid(), data);
+                return AddOrUpdate(context.Location, Guid.NewGuid(), data);
             };
         }
 
-        private static Func<Guid, JobData, JobHeader> Update(string location)
+        private static Func<Guid, JobData, JobHeader> Update(JobRepositoryFactoryContext context)
         {
             return (identifier, data) =>
             {
-                return Add(location, identifier, data);
+                return AddOrUpdate(context.Location, identifier, data);
             };
         }
 
-        private static JobHeader Add(string location, Guid identifier, JobData data)
+        private static JobHeader AddOrUpdate(string location, Guid identifier, JobData data)
         {
             int version = 1;
             string name = identifier.ToHex();

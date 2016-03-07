@@ -42,8 +42,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Blobs\Blob.cs" />
+    <Compile Include="Blobs\BlobCreation.cs" />
+    <Compile Include="Blobs\BlobDeployment.cs" />
+    <Compile Include="Blobs\BlobFactory.cs" />
+    <Compile Include="Blobs\BlobFactoryContext.cs" />
+    <Compile Include="Blobs\BlobFileCollection.cs" />
     <Compile Include="Blobs\BlobRepository.cs" />
     <Compile Include="Blobs\BlobRepositoryFactory.cs" />
+    <Compile Include="Blobs\BlobFile.cs" />
+    <Compile Include="Blobs\BlobRepositoryFactoryContext.cs" />
+    <Compile Include="Core\Criteria.cs" />
     <Compile Include="Executions\JobExecutionRepositoryFactory.cs" />
     <Compile Include="Executions\JobExecution.cs" />
     <Compile Include="Executions\JobExecutionFileEntry.cs" />
@@ -55,12 +63,16 @@
     <Compile Include="Executions\JobProcessorUsage.cs" />
     <Compile Include="Extensions\BytesExtensions.cs" />
     <Compile Include="Extensions\ContextExtensions.cs" />
+    <Compile Include="Jobs\JobFactory.cs" />
+    <Compile Include="Jobs\JobFactoryContext.cs" />
+    <Compile Include="Jobs\JobCriteria.cs" />
     <Compile Include="Jobs\JobRepository.cs" />
     <Compile Include="Jobs\Job.cs" />
     <Compile Include="Jobs\JobData.cs" />
     <Compile Include="Jobs\JobHeader.cs" />
     <Compile Include="Jobs\JobFileEntry.cs" />
     <Compile Include="Jobs\JobRepositoryFactory.cs" />
+    <Compile Include="Jobs\JobRepositoryFactoryContext.cs" />
     <Compile Include="Jobs\JobSchedule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

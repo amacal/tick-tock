@@ -25,17 +25,25 @@ namespace TickTock.Runner
             {
                 JobTask task;
 
-                foreach (Job job in context.Jobs.GetAll())
+                foreach (Job job in context.Jobs.All(with => { }))
                 {
                     JobExecution execution = context.Executions.GetByJob(job.Header).FirstOrDefault();
-                    if (execution == null)
+                    if (execution == null || execution.Progress.GetStatus() == JobExecutionStatus.Idle)
                     {
                         task = context.Tasks.New(job);
                         task.Start();
                     }
                     else if (execution.Progress.GetStatus() == JobExecutionStatus.Completed)
                     {
-                        if (execution.CanExecuteNext(job.Schedule))
+                        if (execution.NextRun(job.Schedule) < DateTime.Now)
+                        {
+                            task = context.Tasks.New(job);
+                            task.Start();
+                        }
+                    }
+                    else if (execution.Progress.GetStatus() == JobExecutionStatus.Failed)
+                    {
+                        if (execution.NextRun(job.Schedule) < DateTime.Now)
                         {
                             task = context.Tasks.New(job);
                             task.Start();
@@ -44,8 +52,7 @@ namespace TickTock.Runner
                     else
                     {
                         task = context.Tasks.GetByJob(job, execution);
-                        execution.Metrics.OnMemory(task.Statistics.GetMemory());
-                        execution.Metrics.OnProcessor(task.Statistics.GetProcessor());
+                        task.Statistics.Publish();
                     }
                 }
             };

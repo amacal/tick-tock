@@ -14,10 +14,10 @@ namespace TickTock.Core.Executions
 
         public JobExecutionProgress Progress { get; set; }
 
-        public Action<Blob> Deploy { get; set; }
+        public Func<Blob, BlobDeployment> Deploy { get; set; }
 
         public Func<JobData, string> GetPath { get; set; }
 
-        public Func<JobSchedule, bool> CanExecuteNext { get; set; }
+        public Func<JobSchedule, DateTime?> NextRun { get; set; }
     }
 }

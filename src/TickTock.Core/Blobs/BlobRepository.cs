@@ -6,6 +6,6 @@ namespace TickTock.Core.Blobs
     {
         public Func<Guid, Blob> GetById { get; set; }
 
-        public Func<byte[], Blob> Add { get; set; }
+        public Func<byte[], BlobCreation> Create { get; set; }
     }
 }

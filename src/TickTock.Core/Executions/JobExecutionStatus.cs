@@ -5,6 +5,7 @@
         Idle,
         Pending,
         Running,
-        Completed
+        Completed,
+        Failed
     }
 }

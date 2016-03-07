@@ -202,7 +202,7 @@ namespace TickTock.Gate.Tests.Modules
             public JobRepositoryStub(Action<JobRepositoryConfigurer> with)
             {
                 base.Add = Add;
-                base.GetById = GetById;
+                base.Single = Single;
 
                 items = new Dictionary<JobHeader, JobData>();
                 with(new JobRepositoryConfigurer(items));
@@ -220,13 +220,16 @@ namespace TickTock.Gate.Tests.Modules
                 return header;
             }
 
-            private new Job GetById(Guid identifier)
+            private new Job Single(Action<JobCriteria> with)
             {
+                JobCriteria criteria = new JobCriteria();
+                with(criteria);
+
                 return items
-                    .Where(x => x.Key.Identifier == identifier)
+                    .Where(x => criteria.Identifier.Is(x.Key.Identifier))
                     .OrderByDescending(x => x.Key.Version)
                     .Select(x => new Job { Header = x.Key, Data = x.Value })
-                    .FirstOrDefault();
+                    .SingleOrDefault();
             }
         }
 

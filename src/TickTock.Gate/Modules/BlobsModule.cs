@@ -1,6 +1,7 @@
 ﻿using Nancy;
 using System;
 using System.IO;
+using System.Linq;
 using TickTock.Core.Blobs;
 using TickTock.Core.Extensions;
 
@@ -27,12 +28,9 @@ namespace TickTock.Gate.Modules
                 memory.Seek(0, SeekOrigin.Begin);
 
                 byte[] content = memory.ToArray();
-                Blob blob = repository.Add(content);
+                BlobCreation creation = repository.Create(content);
 
-                return Response.AsJson(new
-                {
-                    id = blob.Identifier.ToHex()
-                });
+                return ToResponse(creation.GetBlob());
             }
         }
 
@@ -43,11 +41,32 @@ namespace TickTock.Gate.Modules
             if (blob == null)
                 return HttpStatusCode.NotFound;
 
+            return ToResponse(blob);
+        }
+
+        private Response ToResponse(Blob blob)
+        {
             return Response.AsJson(new
             {
+                id = blob.Identifier.ToHex(),
                 size = blob.GetSize(),
-                hash = blob.GetHash()
+                hash = blob.GetHash(),
+                files = GetFiles(blob)
             });
+        }
+
+        private static object GetFiles(Blob blob)
+        {
+            return blob.GetFiles().Select(FromFile).ToArray();
+        }
+
+        private static object FromFile(BlobFile file)
+        {
+            return new
+            {
+                name = file.Name,
+                path = file.Path
+            };
         }
     }
 }

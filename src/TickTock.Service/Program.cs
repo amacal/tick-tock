@@ -15,9 +15,17 @@ namespace TickTock.Service
         {
             const string path = @"d:\\tick-tock";
 
-            BlobRepository blobs = BlobRepositoryFactory.Create(Path.Combine(path, "blobs"));
+            BlobRepository blobs = BlobRepositoryFactory.Create(with =>
+            {
+                with.Location = Path.Combine(path, "blobs");
+            });
+
             JobExecutionRepository executions = JobExecutionRepositoryFactory.Create(Path.Combine(path, "executions"));
-            JobRepository jobs = JobRepositoryFactory.Create(Path.Combine(path, "jobs"));
+
+            JobRepository jobs = JobRepositoryFactory.Create(with =>
+            {
+                with.Location = Path.Combine(path, "jobs");
+            });
 
             JobTaskRepository tasks = JobTaskRepositoryFactory.Create(with =>
             {

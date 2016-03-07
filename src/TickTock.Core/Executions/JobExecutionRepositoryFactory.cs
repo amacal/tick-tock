@@ -112,11 +112,12 @@ namespace TickTock.Core.Executions
 
             execution.Deploy = Deploy(location, execution);
             execution.GetPath = GetPath(location, execution);
-            execution.CanExecuteNext = CanExecuteNext(location, execution);
+            execution.NextRun = NextRun(location, execution);
             execution.Progress.GetStatus = GetStatus(location, execution);
             execution.Progress.OnScheduled = OnScheduled(location, execution);
             execution.Progress.OnStarted = OnStarted(location, execution);
             execution.Progress.OnCompleted = OnCompleted(location, execution);
+            execution.Progress.OnFailed = OnFailed(location, execution);
             execution.Progress.GetPid = GetPid(location, execution);
             execution.Metrics.OnMemory = OnMemory(location, execution);
             execution.Metrics.OnProcessor = OnProcessor(location, execution);
@@ -124,14 +125,14 @@ namespace TickTock.Core.Executions
             return execution;
         }
 
-        private static Action<Blob> Deploy(string location, JobExecution execution)
+        private static Func<Blob, BlobDeployment> Deploy(string location, JobExecution execution)
         {
             return blob =>
             {
                 string root = GetRootPath(location, execution);
                 string path = Path.Combine(root, "blob");
 
-                blob.DeployTo(path);
+                return blob.DeployTo(path);
             };
         }
 
@@ -146,21 +147,23 @@ namespace TickTock.Core.Executions
             };
         }
 
-        private static Func<JobSchedule, bool> CanExecuteNext(string location, JobExecution execution)
+        private static Func<JobSchedule, DateTime?> NextRun(string location, JobExecution execution)
         {
             return schedule =>
             {
                 if (schedule == null)
-                    return false;
+                    return null;
 
+                DateTime? lastExecutedAt = null;
                 string root = GetRootPath(location, execution);
+
                 string path = Path.Combine(root, "metadata");
                 string file = Path.Combine(path, ".completed");
 
-                if (File.Exists(file) == false)
-                    return false;
+                if (File.Exists(file))
+                    lastExecutedAt = File.GetCreationTime(file);
 
-                return File.GetCreationTime(file).Add(schedule.Interval) < DateTime.Now;
+                return schedule.Next(lastExecutedAt);
             };
         }
 
@@ -197,6 +200,18 @@ namespace TickTock.Core.Executions
                 string file = Path.Combine(path, ".completed");
 
                 File.WriteAllBytes(file, new byte[0]);
+            };
+        }
+
+        private static Action<string> OnFailed(string location, JobExecution execution)
+        {
+            return reason =>
+            {
+                string root = GetRootPath(location, execution);
+                string path = Path.Combine(root, "metadata");
+                string file = Path.Combine(path, ".failed");
+
+                File.WriteAllText(file, reason);
             };
         }
 
@@ -241,6 +256,9 @@ namespace TickTock.Core.Executions
 
                 if (File.Exists(Path.Combine(path, ".scheduled")))
                     return JobExecutionStatus.Pending;
+
+                if (File.Exists(Path.Combine(path, ".failed")))
+                    return JobExecutionStatus.Failed;
 
                 return JobExecutionStatus.Idle;
             };

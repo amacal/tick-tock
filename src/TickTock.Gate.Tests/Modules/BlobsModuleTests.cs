@@ -167,18 +167,23 @@ namespace TickTock.Gate.Tests.Modules
 
             public BlobRepositoryMock(Action<BlobRepositoryConfigurer> with)
             {
-                base.Add = Add;
+                base.Create = Create;
                 base.GetById = GetById;
 
                 items = new Dictionary<Guid, byte[]>();
                 with(new BlobRepositoryConfigurer(items));
             }
 
-            private new Blob Add(byte[] data)
+            private new BlobCreation Create(byte[] data)
             {
                 Guid id = Guid.NewGuid();
                 items[id] = data;
-                return GetById(id);
+
+                return new BlobCreation
+                {
+                    Success = true,
+                    GetBlob = () => GetById(id),
+                };
             }
 
             private new Blob GetById(Guid identifier)
@@ -193,7 +198,8 @@ namespace TickTock.Gate.Tests.Modules
                 {
                     Identifier = identifier,
                     GetSize = () => content.Length,
-                    GetHash = () => content.ToHash()
+                    GetHash = () => content.ToHash(),
+                    GetFiles = () => new BlobFileCollection { Items = new BlobFile[0] }
                 };
             }
         }

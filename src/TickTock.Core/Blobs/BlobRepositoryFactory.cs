@@ -7,30 +7,37 @@ namespace TickTock.Core.Blobs
 {
     public static class BlobRepositoryFactory
     {
-        public static BlobRepository Create(string location)
+        public static BlobRepository Create(Action<BlobRepositoryFactoryContext> with)
         {
-            return new BlobRepository
+            return with.Apply(context =>
             {
-                GetById = GetById(location),
-                Add = Add(location)
-            };
+                return new BlobRepository
+                {
+                    GetById = GetById(context),
+                    Create = CreateBlob(context)
+                };
+            });
         }
 
-        private static Func<Guid, Blob> GetById(string location)
+        private static Func<Guid, Blob> GetById(BlobRepositoryFactoryContext context)
         {
             return identifier =>
             {
                 string name = identifier.ToHex();
-                string[] files = Directory.GetFiles(location, $"{name}-*");
+                string[] files = Directory.GetFiles(context.Location, $"{name}-*");
 
                 if (files.Length != 1)
                     return null;
 
-                return Build(identifier, files[0]);
+                return BlobFactory.Create(with =>
+                {
+                    with.Identifier = identifier;
+                    with.Path = files[0];
+                });
             };
         }
 
-        public static Func<byte[], Blob> Add(string location)
+        public static Func<byte[], BlobCreation> CreateBlob(BlobRepositoryFactoryContext context)
         {
             return data =>
             {
@@ -38,49 +45,54 @@ namespace TickTock.Core.Blobs
                 string name = identifier.ToHex();
 
                 string hash = data.ToHash();
-                string path = Path.Combine(location, $"{name}-{hash}");
+                string path = Path.Combine(context.Location, $"{name}-{hash}");
 
-                File.WriteAllBytes(path, data);
-                return Build(identifier, path);
+                if (IsValidZipContent(data))
+                {
+                    File.WriteAllBytes(path, data);
+
+                    return new BlobCreation
+                    {
+                        Success = true,
+                        GetBlob = () => BlobFactory.Create(with =>
+                        {
+                            with.Identifier = identifier;
+                            with.Path = path;
+                        })
+                    };
+                }
+
+                return new BlobCreation
+                {
+                    Success = false
+                };
             };
         }
 
-        private static Blob Build(Guid identifier, string filename)
+        private static bool IsValidZipContent(byte[] data)
         {
-            Blob blob = new Blob
+            byte[] buffer = new byte[1024];
+
+            try
             {
-                Identifier = identifier
-            };
+                using (MemoryStream stream = new MemoryStream(data))
+                using (ZipArchive archive = new ZipArchive(stream))
+                {
+                    foreach (ZipArchiveEntry entry in archive.Entries)
+                    {
+                        using (Stream ignore = entry.Open())
+                        {
+                            while (ignore.Read(buffer, 0, buffer.Length) > 0) ;
+                        }
+                    }
+                }
 
-            blob.GetHash = GetHash(blob, filename);
-            blob.GetSize = GetSize(blob, filename);
-            blob.DeployTo = DeployTo(blob, filename);
-
-            return blob;
-        }
-
-        private static Func<string> GetHash(Blob blob, string path)
-        {
-            return () =>
+                return true;
+            }
+            catch (InvalidDataException)
             {
-                return Path.GetFileName(path).Split('-')[1];
-            };
-        }
-
-        private static Func<long> GetSize(Blob blob, string path)
-        {
-            return () =>
-            {
-                return new FileInfo(path).Length;
-            };
-        }
-
-        private static Action<string> DeployTo(Blob blob, string path)
-        {
-            return destination =>
-            {
-                ZipFile.ExtractToDirectory(path, destination);
-            };
+                return false;
+            }
         }
     }
 }

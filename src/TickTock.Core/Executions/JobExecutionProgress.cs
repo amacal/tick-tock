@@ -13,5 +13,7 @@ namespace TickTock.Core.Executions
         public Action<int> OnStarted { get; set; }
 
         public Action OnCompleted { get; set; }
+
+        public Action<string> OnFailed { get; set; }
     }
 }
