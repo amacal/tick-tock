@@ -40,6 +40,8 @@
     <Compile Include="JobRunnerFactory.cs" />
     <Compile Include="JobRunnerFactoryContext.cs" />
     <Compile Include="JobTask.cs" />
+    <Compile Include="JobTaskFactory.cs" />
+    <Compile Include="JobTaskFactoryContext.cs" />
     <Compile Include="JobTaskRepository.cs" />
     <Compile Include="JobTaskRepositoryFactory.cs" />
     <Compile Include="JobTaskRepositoryFactoryContext.cs" />

@@ -14,7 +14,7 @@ namespace TickTock.Core.Blobs
                 return new BlobRepository
                 {
                     GetById = GetById(context),
-                    Create = CreateBlob(context)
+                    New = New(context)
                 };
             });
         }
@@ -37,7 +37,7 @@ namespace TickTock.Core.Blobs
             };
         }
 
-        public static Func<byte[], BlobCreation> CreateBlob(BlobRepositoryFactoryContext context)
+        public static Func<byte[], BlobCreation> New(BlobRepositoryFactoryContext context)
         {
             return data =>
             {

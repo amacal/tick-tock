@@ -28,7 +28,7 @@ namespace TickTock.Gate.Modules
                 memory.Seek(0, SeekOrigin.Begin);
 
                 byte[] content = memory.ToArray();
-                BlobCreation creation = repository.Create(content);
+                BlobCreation creation = repository.New(content);
 
                 return ToResponse(creation.GetBlob());
             }

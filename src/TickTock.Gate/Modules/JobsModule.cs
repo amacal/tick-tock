@@ -48,16 +48,19 @@ namespace TickTock.Gate.Modules
                 JobExecution execution = executions.GetByJob(job.Header).FirstOrDefault();
                 DateTime? nextRun = execution != null ? execution.NextRun(job.Schedule) : job.Schedule.Next(null);
 
-                model.Add(new
+                job.Extract(data =>
                 {
-                    id = job.Header.Identifier.ToHex(),
-                    version = job.Header.Version,
-                    name = job.Data.Name,
-                    description = job.Data.Description,
-                    executable = job.Data.Executable,
-                    arguments = job.Data.Arguments,
-                    blob = job.Data.Blob.ToHex(),
-                    nextRun = nextRun
+                    model.Add(new
+                    {
+                        id = job.Header.Identifier.ToHex(),
+                        version = job.Header.Version,
+                        name = data.Name,
+                        description = data.Description,
+                        executable = data.Executable,
+                        arguments = data.Arguments,
+                        blob = data.Blob.ToHex(),
+                        nextRun = nextRun
+                    });
                 });
             }
 
@@ -75,7 +78,7 @@ namespace TickTock.Gate.Modules
                 Blob = model.blob
             };
 
-            JobHeader header = jobs.Add(data);
+            JobHeader header = jobs.New(data);
             Guid identifier = header.Identifier;
 
             return Response.AsJson(new
@@ -86,24 +89,30 @@ namespace TickTock.Gate.Modules
 
         public Response HandleGetJob(Guid? identifier)
         {
+            Response response = HttpStatusCode.NotFound;
             Job job = jobs.Single(with =>
             {
                 with.Identifier = identifier.Value;
             });
 
-            if (job == null)
-                return HttpStatusCode.NotFound;
-
-            return Response.AsJson(new
+            if (job != null)
             {
-                id = job.Header.Identifier.ToHex(),
-                version = job.Header.Version,
-                name = job.Data.Name,
-                description = job.Data.Description,
-                executable = job.Data.Executable,
-                arguments = job.Data.Arguments,
-                blob = job.Data.Blob.ToHex()
-            });
+                job.Extract(data =>
+                {
+                    response = Response.AsJson(new
+                    {
+                        id = job.Header.Identifier.ToHex(),
+                        version = job.Header.Version,
+                        name = data.Name,
+                        description = data.Description,
+                        executable = data.Executable,
+                        arguments = data.Arguments,
+                        blob = data.Blob.ToHex()
+                    });
+                });
+            }
+
+            return response;
         }
     }
 }

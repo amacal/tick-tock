@@ -201,7 +201,7 @@ namespace TickTock.Gate.Tests.Modules
 
             public JobRepositoryStub(Action<JobRepositoryConfigurer> with)
             {
-                base.Add = Add;
+                base.New = Add;
                 base.Single = Single;
 
                 items = new Dictionary<JobHeader, JobData>();
@@ -228,7 +228,7 @@ namespace TickTock.Gate.Tests.Modules
                 return items
                     .Where(x => criteria.Identifier.Is(x.Key.Identifier))
                     .OrderByDescending(x => x.Key.Version)
-                    .Select(x => new Job { Header = x.Key, Data = x.Value })
+                    .Select(x => new Job { Header = x.Key, Extract = callback => callback(x.Value) })
                     .SingleOrDefault();
             }
         }

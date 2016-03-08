@@ -9,6 +9,6 @@ namespace TickTock.Core.Executions
 
         public Func<JobHeader, JobExecution[]> GetByJob { get; set; }
 
-        public Func<JobHeader, JobExecution> Add { get; set; }
+        public Func<JobHeader, JobExecution> New { get; set; }
     }
 }

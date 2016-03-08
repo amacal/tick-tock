@@ -12,7 +12,7 @@ namespace TickTock.Runner.Tests.Stubs
 
         public JobExecutionRepositoryStub(Action<JobExecutionRepositoryConfigurer> with)
         {
-            base.Add = Add;
+            base.New = Add;
             base.GetById = GetById;
 
             items = new List<JobExecution>();

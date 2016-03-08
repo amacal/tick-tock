@@ -8,7 +8,7 @@ namespace TickTock.Core.Jobs
 
         public Func<Action<JobCriteria>, Job> Single { get; set; }
 
-        public Func<JobData, JobHeader> Add { get; set; }
+        public Func<JobData, JobHeader> New { get; set; }
 
         public Func<Guid, JobData, JobHeader> Update { get; set; }
     }

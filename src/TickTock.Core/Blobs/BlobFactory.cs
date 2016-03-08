@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using TickTock.Core.Extensions;
 
 namespace TickTock.Core.Blobs
@@ -86,8 +87,17 @@ namespace TickTock.Core.Blobs
                     Files = new BlobFileCollection
                     {
                         Items = files.ToArray()
-                    }
+                    },
+                    Find = Find(files)
                 };
+            };
+        }
+
+        private static Func<string, string> Find(List<BlobFile> files)
+        {
+            return name =>
+            {
+                return files.Where(x => x.Path.EndsWith(name, StringComparison.OrdinalIgnoreCase)).Select(x => x.Path).Single();
             };
         }
     }

@@ -30,17 +30,17 @@ namespace TickTock.Core.Tests.Blobs
             {
                 byte[] data = GetSampleZipFile();
 
-                Blob blob = repository.Create(data).GetBlob();
+                Blob blob = repository.New(data).GetBlob();
 
                 blob.Identifier.Should().NotBeEmpty();
             }
 
             [Fact]
-            public void OutOfTheZipFileShouldNotCreateBlob()
+            public void NotFromTheZipFileShouldNotCreateBlob()
             {
                 byte[] data = GetSampleUnknownFile();
 
-                BlobCreation creation = repository.Create(data);
+                BlobCreation creation = repository.New(data);
 
                 creation.Success.Should().BeFalse();
             }
@@ -138,7 +138,7 @@ namespace TickTock.Core.Tests.Blobs
         private Blob NewBlob(out byte[] data)
         {
             data = GetSampleZipFile();
-            Blob added = repository.Create(data).GetBlob();
+            Blob added = repository.New(data).GetBlob();
 
             return added;
         }

@@ -20,31 +20,34 @@ namespace TickTock.Core.Tests.Jobs
             });
         }
 
-        [Fact]
-        public void AddingJobShouldReturnGuid()
+        public class AddingJob : JobRepositoryTests
         {
-            JobData data = Jobs.TickTockData;
+            [Fact]
+            public void ShouldReturnGuid()
+            {
+                JobData data = Jobs.TickTockData;
 
-            JobHeader header = repository.Add(data);
+                JobHeader header = repository.New(data);
 
-            header.Identifier.Should().NotBeEmpty();
-        }
+                header.Identifier.Should().NotBeEmpty();
+            }
 
-        [Fact]
-        public void AddingJobShouldReturnFirstVersion()
-        {
-            JobData data = Jobs.TickTockData;
+            [Fact]
+            public void ShouldReturnFirstVersion()
+            {
+                JobData data = Jobs.TickTockData;
 
-            JobHeader header = repository.Add(data);
+                JobHeader header = repository.New(data);
 
-            header.Version.Should().Be(1);
+                header.Version.Should().Be(1);
+            }
         }
 
         [Fact]
         public void UpdatingJobShouldReturnSameGuid()
         {
             JobData data = Jobs.TickTockData;
-            JobHeader created = repository.Add(data);
+            JobHeader created = repository.New(data);
 
             JobData upgrade = Jobs.TickTockDataV2;
             JobHeader header = repository.Update(created.Identifier, upgrade);
@@ -56,7 +59,7 @@ namespace TickTock.Core.Tests.Jobs
         public void UpdatingJobShouldReturnNextVersion()
         {
             JobData data = Jobs.TickTockData;
-            JobHeader created = repository.Add(data);
+            JobHeader created = repository.New(data);
 
             JobData upgrade = Jobs.TickTockDataV2;
             JobHeader header = repository.Update(created.Identifier, upgrade);
@@ -68,7 +71,7 @@ namespace TickTock.Core.Tests.Jobs
         public void RequestingAddedJobShouldReturnItsIdentifier()
         {
             JobData data = Jobs.TickTockData;
-            JobHeader created = repository.Add(data);
+            JobHeader created = repository.New(data);
 
             Job job = repository.Single(with =>
             {
@@ -81,15 +84,18 @@ namespace TickTock.Core.Tests.Jobs
         [Fact]
         public void RequestingAddedJobShouldReturnItsData()
         {
-            JobData data = Jobs.TickTockData;
-            JobHeader created = repository.Add(data);
+            JobData initial = Jobs.TickTockData;
+            JobHeader created = repository.New(initial);
 
             Job job = repository.Single(with =>
             {
                 with.Identifier = created.Identifier;
             });
 
-            job.Data.ShouldBeEquivalentTo(data);
+            job.Extract(data =>
+            {
+                data.ShouldBeEquivalentTo(initial);
+            });
         }
 
         [Fact]
@@ -108,8 +114,8 @@ namespace TickTock.Core.Tests.Jobs
         [Fact]
         public void RequestingUpgradedJobShouldReturnNewestVersion()
         {
-            JobData data = Jobs.TickTockData;
-            JobHeader created = repository.Add(data);
+            JobData initial = Jobs.TickTockData;
+            JobHeader created = repository.New(initial);
 
             JobData upgrade = Jobs.TickTockDataV2;
             JobHeader header = repository.Update(created.Identifier, upgrade);
@@ -120,14 +126,17 @@ namespace TickTock.Core.Tests.Jobs
                 with.Version = header.Version;
             });
 
-            job.Data.ShouldBeEquivalentTo(upgrade);
+            job.Extract(data =>
+            {
+                data.ShouldBeEquivalentTo(upgrade);
+            });
         }
 
         [Fact]
         public void RequestingUpgradedJobByVersionShouldReturnRequestedVersion()
         {
-            JobData data = Jobs.TickTockData;
-            JobHeader created = repository.Add(data);
+            JobData initial = Jobs.TickTockData;
+            JobHeader created = repository.New(initial);
 
             JobData upgrade = Jobs.TickTockDataV2;
             JobHeader header = repository.Update(created.Identifier, upgrade);
@@ -138,14 +147,17 @@ namespace TickTock.Core.Tests.Jobs
                 with.Version = created.Version;
             });
 
-            job.Data.ShouldBeEquivalentTo(data);
+            job.Extract(data =>
+            {
+                data.ShouldBeEquivalentTo(initial);
+            });
         }
 
         [Fact]
         public void RequestingJobByNotUpgradedVersionShouldReturnNull()
         {
             JobData data = Jobs.TickTockData;
-            JobHeader created = repository.Add(data);
+            JobHeader created = repository.New(data);
 
             Job job = repository.Single(with =>
             {

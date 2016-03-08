@@ -11,24 +11,31 @@ namespace TickTock.Core.Jobs
         {
             return with.Apply(context =>
             {
-                string content = File.ReadAllText(context.Entry.Path);
-                JobHeader header = new JobHeader
+                return new Job
                 {
-                    Identifier = context.Entry.Identifier,
-                    Version = context.Entry.Version
+                    Extract = Extract(context),
+                    Header = new JobHeader
+                    {
+                        Identifier = context.Entry.Identifier,
+                        Version = context.Entry.Version
+                    },
+                    Schedule = new JobSchedule
+                    {
+                        Next = Next()
+                    }
                 };
-
-                Job job = new Job
-                {
-                    Header = header,
-                    Data = JsonConvert.DeserializeObject<JobData>(content),
-                    Schedule = new JobSchedule()
-                };
-
-                job.Schedule.Next = Next();
-
-                return job;
             });
+        }
+
+        private static Action<Action<JobData>> Extract(JobFactoryContext context)
+        {
+            return callback =>
+            {
+                string content = File.ReadAllText(context.Entry.Path);
+                JobData data = JsonConvert.DeserializeObject<JobData>(content);
+
+                callback(data);
+            };
         }
 
         private static Func<DateTime?, DateTime?> Next()

@@ -16,8 +16,6 @@ namespace TickTock.Core.Executions
 
         public Func<Blob, BlobDeployment> Deploy { get; set; }
 
-        public Func<JobData, string> GetPath { get; set; }
-
         public Func<JobSchedule, DateTime?> NextRun { get; set; }
     }
 }

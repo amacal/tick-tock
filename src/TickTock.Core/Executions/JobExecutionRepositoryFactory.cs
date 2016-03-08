@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
-using TickTock.Core.Blobs;
 using TickTock.Core.Extensions;
 using TickTock.Core.Jobs;
 
@@ -10,25 +9,31 @@ namespace TickTock.Core.Executions
 {
     public static class JobExecutionRepositoryFactory
     {
-        public static JobExecutionRepository Create(string location)
+        public static JobExecutionRepository Create(Action<JobExecutionRepositoryFactoryContext> with)
         {
-            return new JobExecutionRepository
+            return with.Apply(context =>
             {
-                Add = Add(location),
-                GetById = GetById(location),
-                GetByJob = GetByJob(location)
-            };
+                return new JobExecutionRepository
+                {
+                    New = New(context),
+                    GetById = GetById(context),
+                    GetByJob = GetByJob(context)
+                };
+            });
         }
 
-        private static Func<Guid, JobExecution> GetById(string location)
+        private static Func<Guid, JobExecution> GetById(JobExecutionRepositoryFactoryContext context)
         {
             return identifier =>
             {
-                foreach (JobExecutionFileEntry entry in Query(location))
+                foreach (JobExecutionFileEntry entry in Query(context.Location))
                 {
                     if (entry.Identifier == identifier)
                     {
-                        return Build(location, entry.Identifier, entry.Job);
+                        return JobExecutionFactory.Build(with =>
+                        {
+                            with.Entry = entry;
+                        });
                     }
                 }
 
@@ -36,17 +41,20 @@ namespace TickTock.Core.Executions
             };
         }
 
-        private static Func<JobHeader, JobExecution[]> GetByJob(string location)
+        private static Func<JobHeader, JobExecution[]> GetByJob(JobExecutionRepositoryFactoryContext context)
         {
             return job =>
             {
                 List<JobExecution> executions = new List<JobExecution>();
 
-                foreach (JobExecutionFileEntry entry in Query(location))
+                foreach (JobExecutionFileEntry entry in Query(context.Location))
                 {
                     if (entry.Job == job)
                     {
-                        executions.Add(Build(location, entry.Identifier, entry.Job));
+                        executions.Add(JobExecutionFactory.Build(with =>
+                        {
+                            with.Entry = entry;
+                        }));
                     }
                 }
 
@@ -54,7 +62,7 @@ namespace TickTock.Core.Executions
             };
         }
 
-        private static Func<JobHeader, JobExecution> Add(string location)
+        private static Func<JobHeader, JobExecution> New(JobExecutionRepositoryFactoryContext context)
         {
             return job =>
             {
@@ -63,7 +71,7 @@ namespace TickTock.Core.Executions
                 string name = job.Identifier.ToHex();
                 int version = job.Version;
 
-                string root = Path.Combine(location, $"{prefix}-{name}-{version}");
+                string root = Path.Combine(context.Location, $"{prefix}-{name}-{version}");
                 string blob = Path.Combine(root, "blob");
                 string metadata = Path.Combine(root, "metadata");
 
@@ -71,7 +79,15 @@ namespace TickTock.Core.Executions
                 Directory.CreateDirectory(blob);
                 Directory.CreateDirectory(metadata);
 
-                return Build(location, identifier, job);
+                return JobExecutionFactory.Build(with =>
+                {
+                    with.Entry = new JobExecutionFileEntry
+                    {
+                        Job = job,
+                        Path = root,
+                        Identifier = identifier
+                    };
+                });
             };
         }
 
@@ -98,179 +114,6 @@ namespace TickTock.Core.Executions
                     };
                 }
             }
-        }
-
-        private static JobExecution Build(string location, Guid identifier, JobHeader header)
-        {
-            JobExecution execution = new JobExecution
-            {
-                Identifier = identifier,
-                Job = header,
-                Progress = new JobExecutionProgress(),
-                Metrics = new JobExecutionMetrics()
-            };
-
-            execution.Deploy = Deploy(location, execution);
-            execution.GetPath = GetPath(location, execution);
-            execution.NextRun = NextRun(location, execution);
-            execution.Progress.GetStatus = GetStatus(location, execution);
-            execution.Progress.OnScheduled = OnScheduled(location, execution);
-            execution.Progress.OnStarted = OnStarted(location, execution);
-            execution.Progress.OnCompleted = OnCompleted(location, execution);
-            execution.Progress.OnFailed = OnFailed(location, execution);
-            execution.Progress.GetPid = GetPid(location, execution);
-            execution.Metrics.OnMemory = OnMemory(location, execution);
-            execution.Metrics.OnProcessor = OnProcessor(location, execution);
-
-            return execution;
-        }
-
-        private static Func<Blob, BlobDeployment> Deploy(string location, JobExecution execution)
-        {
-            return blob =>
-            {
-                string root = GetRootPath(location, execution);
-                string path = Path.Combine(root, "blob");
-
-                return blob.DeployTo(path);
-            };
-        }
-
-        private static Func<JobData, string> GetPath(string location, JobExecution execution)
-        {
-            return data =>
-            {
-                string root = GetRootPath(location, execution);
-                string path = Path.Combine(root, "blob", data.Executable);
-
-                return path;
-            };
-        }
-
-        private static Func<JobSchedule, DateTime?> NextRun(string location, JobExecution execution)
-        {
-            return schedule =>
-            {
-                if (schedule == null)
-                    return null;
-
-                DateTime? lastExecutedAt = null;
-                string root = GetRootPath(location, execution);
-
-                string path = Path.Combine(root, "metadata");
-                string file = Path.Combine(path, ".completed");
-
-                if (File.Exists(file))
-                    lastExecutedAt = File.GetCreationTime(file);
-
-                return schedule.Next(lastExecutedAt);
-            };
-        }
-
-        private static Action OnScheduled(string location, JobExecution execution)
-        {
-            return () =>
-            {
-                string root = GetRootPath(location, execution);
-                string path = Path.Combine(root, "metadata");
-                string file = Path.Combine(path, ".scheduled");
-
-                File.WriteAllBytes(file, new byte[0]);
-            };
-        }
-
-        private static Action<int> OnStarted(string location, JobExecution execution)
-        {
-            return pid =>
-            {
-                string root = GetRootPath(location, execution);
-                string path = Path.Combine(root, "metadata");
-                string file = Path.Combine(path, ".pid");
-
-                File.WriteAllText(file, pid.ToString());
-            };
-        }
-
-        private static Action OnCompleted(string location, JobExecution execution)
-        {
-            return () =>
-            {
-                string root = GetRootPath(location, execution);
-                string path = Path.Combine(root, "metadata");
-                string file = Path.Combine(path, ".completed");
-
-                File.WriteAllBytes(file, new byte[0]);
-            };
-        }
-
-        private static Action<string> OnFailed(string location, JobExecution execution)
-        {
-            return reason =>
-            {
-                string root = GetRootPath(location, execution);
-                string path = Path.Combine(root, "metadata");
-                string file = Path.Combine(path, ".failed");
-
-                File.WriteAllText(file, reason);
-            };
-        }
-
-        private static Func<int> GetPid(string location, JobExecution execution)
-        {
-            return () =>
-            {
-                string root = GetRootPath(location, execution);
-                string path = Path.Combine(root, "metadata");
-                string file = Path.Combine(path, ".pid");
-
-                return Int32.Parse(File.ReadAllText(file));
-            };
-        }
-
-        private static Action<JobMemoryUsage> OnMemory(string location, JobExecution execution)
-        {
-            return usage =>
-            {
-            };
-        }
-
-        private static Action<JobProcessorUsage> OnProcessor(string location, JobExecution execution)
-        {
-            return usage =>
-            {
-            };
-        }
-
-        private static Func<JobExecutionStatus> GetStatus(string location, JobExecution execution)
-        {
-            return () =>
-            {
-                string root = GetRootPath(location, execution);
-                string path = Path.Combine(root, "metadata");
-
-                if (File.Exists(Path.Combine(path, ".completed")))
-                    return JobExecutionStatus.Completed;
-
-                if (File.Exists(Path.Combine(path, ".pid")))
-                    return JobExecutionStatus.Running;
-
-                if (File.Exists(Path.Combine(path, ".scheduled")))
-                    return JobExecutionStatus.Pending;
-
-                if (File.Exists(Path.Combine(path, ".failed")))
-                    return JobExecutionStatus.Failed;
-
-                return JobExecutionStatus.Idle;
-            };
-        }
-
-        private static string GetRootPath(string location, JobExecution execution)
-        {
-            string prefix = execution.Identifier.ToHex();
-            string name = execution.Job.Identifier.ToHex();
-            int version = execution.Job.Version;
-
-            return Path.Combine(location, $"{prefix}-{name}-{version}");
         }
     }
 }

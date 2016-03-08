@@ -17,7 +17,7 @@ namespace TickTock.Core.Jobs
             {
                 return new JobRepository
                 {
-                    Add = Add(context),
+                    New = New(context),
                     All = All(context),
                     Single = Single(context),
                     Update = Update(context)
@@ -60,7 +60,7 @@ namespace TickTock.Core.Jobs
             }
         }
 
-        private static Func<JobData, JobHeader> Add(JobRepositoryFactoryContext context)
+        private static Func<JobData, JobHeader> New(JobRepositoryFactoryContext context)
         {
             return data =>
             {

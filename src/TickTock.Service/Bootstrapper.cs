@@ -27,7 +27,10 @@ namespace TickTock.Service
                 with.Location = Path.Combine(location, "blobs");
             }));
 
-            container.Register(JobExecutionRepositoryFactory.Create(Path.Combine(location, "executions")));
+            container.Register(JobExecutionRepositoryFactory.Create(with =>
+            {
+                with.Location = Path.Combine(location, "executions");
+            }));
 
             container.Register(JobRepositoryFactory.Create(with =>
             {

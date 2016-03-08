@@ -167,7 +167,7 @@ namespace TickTock.Gate.Tests.Modules
 
             public BlobRepositoryMock(Action<BlobRepositoryConfigurer> with)
             {
-                base.Create = Create;
+                base.New = Create;
                 base.GetById = GetById;
 
                 items = new Dictionary<Guid, byte[]>();

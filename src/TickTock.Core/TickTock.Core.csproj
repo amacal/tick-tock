@@ -52,12 +52,15 @@
     <Compile Include="Blobs\BlobFile.cs" />
     <Compile Include="Blobs\BlobRepositoryFactoryContext.cs" />
     <Compile Include="Core\Criteria.cs" />
+    <Compile Include="Executions\JobExecutionFactory.cs" />
+    <Compile Include="Executions\JobExecutionFactoryContext.cs" />
     <Compile Include="Executions\JobExecutionRepositoryFactory.cs" />
     <Compile Include="Executions\JobExecution.cs" />
     <Compile Include="Executions\JobExecutionFileEntry.cs" />
     <Compile Include="Executions\JobExecutionMetrics.cs" />
     <Compile Include="Executions\JobExecutionProgress.cs" />
     <Compile Include="Executions\JobExecutionRepository.cs" />
+    <Compile Include="Executions\JobExecutionRepositoryFactoryContext.cs" />
     <Compile Include="Executions\JobExecutionStatus.cs" />
     <Compile Include="Executions\JobMemoryUsage.cs" />
     <Compile Include="Executions\JobProcessorUsage.cs" />
